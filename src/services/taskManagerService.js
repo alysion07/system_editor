@@ -1,182 +1,161 @@
+// services/taskManagerService.js
 import { TaskManagerClient } from '../../proto/task_manager_grpc_web_pb';
 import { TaskArgs, TaskId, TaskLog } from '../../proto/task_manager_pb';
 import { Empty } from 'google-protobuf/google/protobuf/empty_pb';
 
-// Define your service endpoint
-const SERVICE_URL = 'http://localhost:8080'; // Replace with your actual gRPC server URL
+// 전역 상태 관리
+const state = {
+  client: null,
+  pollingIntervals: new Map()
+};
 
-// Create a client instance
-const client = new TaskManagerClient(SERVICE_URL);
+// 초기화 함수
+export const initializeTaskManagerService = (serviceUrl = 'http://129.254.222.219:8443') => {
+  state.client = new TaskManagerClient(serviceUrl);
+  return state.client;
+};
 
-// Wrap the client methods in a more JavaScript-friendly API
-export const taskManagerService = {
-  /**
-   * Start a new task with the provided arguments
-   * @param {string[]} args - Array of task arguments
-   * @returns {Promise<string>} - Task ID
-   */
-  startTask: (args = []) => {
-    return new Promise((resolve, reject) => {
-      const request = new TaskArgs();
-      request.setArgsList(args);
-      
-      client.start_task(request, {}, (err, response) => {
-        if (err) {
-          reject(err);
-          return;
-        }
-        resolve(response.getTaskId());
-      });
+// 클라이언트 가져오기
+const getClient = () => {
+  if (!state.client) {
+    initializeTaskManagerService();
+  }
+  return state.client;
+};
+
+// 태스크 시작
+export const startTask = (args) => {
+  return new Promise((resolve, reject) => {
+    const client = getClient();
+    const taskArgs = new TaskArgs();
+    const argsList = args.split(',').map(arg => arg.trim()).filter(arg => arg);
+    taskArgs.setArgsList(argsList);
+
+    client.start_task(taskArgs, {}, (err, response) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      resolve(response.getTaskId());
     });
-  },
-  
-  /**
-   * Stop a task with the provided ID
-   * @param {string} taskId - ID of the task to stop
-   * @returns {Promise<void>}
-   */
-  stopTask: (taskId) => {
-    return new Promise((resolve, reject) => {
-      const request = new TaskId();
-      request.setTaskId(taskId);
-      
-      client.stop_task(request, {}, (err, response) => {
-        if (err) {
-          reject(err);
-          return;
-        }
-        resolve();
-      });
+  });
+};
+
+// 화면 로그 가져오기
+export const getScreenLog = (taskId) => {
+  return new Promise((resolve, reject) => {
+    const client = getClient();
+    const taskIdObj = new TaskId();
+    taskIdObj.setTaskId(taskId);
+
+    client.get_screen_log(taskIdObj, {}, (err, response) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      resolve(response.getLogMsg());
     });
-  },
-  
-  /**
-   * Get EOL message
-   * @returns {Promise<string>} - EOL message
-   */
-  getEol: () => {
-    return new Promise((resolve, reject) => {
-      const request = new Empty();
-      
-      client.get_eol(request, {}, (err, response) => {
-        if (err) {
-          reject(err);
-          return;
-        }
-        resolve(response.getLogMsg());
-      });
+  });
+};
+
+// 플롯 로그 가져오기
+export const getPlotLog = (taskId) => {
+  return new Promise((resolve, reject) => {
+    const client = getClient();
+    const taskIdObj = new TaskId();
+    taskIdObj.setTaskId(taskId);
+
+    client.get_plot_log(taskIdObj, {}, (err, response) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      resolve(response.getLogMsg());
     });
-  },
-  
-  /**
-   * Get plot log for a task
-   * @param {string} taskId - ID of the task
-   * @returns {Promise<string>} - Log message
-   */
-  getPlotLog: (taskId) => {
-    return new Promise((resolve, reject) => {
-      const request = new TaskId();
-      request.setTaskId(taskId);
-      
-      client.get_plot_log(request, {}, (err, response) => {
-        if (err) {
-          reject(err);
-          return;
-        }
-        resolve(response.getLogMsg());
-      });
-    });
-  },
-  
-  /**
-   * Get screen log for a task
-   * @param {string} taskId - ID of the task
-   * @returns {Promise<string>} - Log message
-   */
-  getScreenLog: (taskId) => {
-    return new Promise((resolve, reject) => {
-      const request = new TaskId();
-      request.setTaskId(taskId);
-      
-      client.get_screen_log(request, {}, (err, response) => {
-        if (err) {
-          reject(err);
-          return;
-        }
-        resolve(response.getLogMsg());
-      });
-    });
-  },
-  
-  /**
-   * Upload screen log for a task
-   * @param {string} taskId - ID of the task
-   * @param {string} logMsg - Log message to upload
-   * @returns {Promise<void>}
-   */
-  uploadScreenLog: (taskId, logMsg) => {
-    return new Promise((resolve, reject) => {
-      const request = new TaskLog();
-      request.setTaskId(taskId);
-      request.setLogMsg(logMsg);
-      
-      client.upload_screen_log(request, {}, (err, response) => {
-        if (err) {
-          reject(err);
-          return;
-        }
-        resolve();
-      });
-    });
-  },
-  
-  /**
-   * Stream plot logs for a task
-   * @param {string} taskId - ID of the task
-   * @param {function(string)} onMessage - Callback for each received message
-   * @param {function(Error)} onError - Callback for errors
-   * @returns {Object} - Stream object with cancel method
-   */
-  streamPlotLogs: (taskId, onMessage, onError) => {
-    const request = new TaskId();
-    request.setTaskId(taskId);
-    
-    const stream = client.download_plot_log(request);
-    
-    stream.on('data', (response) => {
-      onMessage(response.getLogMsg());
-    });
-    
-    stream.on('error', (err) => {
-      if (onError) onError(err);
-    });
-    
-    return stream;
-  },
-  
-  /**
-   * Stream screen logs for a task
-   * @param {string} taskId - ID of the task
-   * @param {function(string)} onMessage - Callback for each received message
-   * @param {function(Error)} onError - Callback for errors
-   * @returns {Object} - Stream object with cancel method
-   */
-  streamScreenLogs: (taskId, onMessage, onError) => {
-    const request = new TaskId();
-    request.setTaskId(taskId);
-    
-    const stream = client.download_screen_log(request);
-    
-    stream.on('data', (response) => {
-      onMessage(response.getLogMsg());
-    });
-    
-    stream.on('error', (err) => {
-      if (onError) onError(err);
-    });
-    
-    return stream;
+  });
+};
+
+// 로그 폴링 시작
+export const startLogPolling = (taskId, options = {}) => {
+  const {
+    screenLogInterval = 5000,
+    plotLogInterval = 10000,
+    onScreenLog = () => {},
+    onPlotLog = () => {},
+    onError = () => {}
+  } = options;
+
+  // 화면 로그 폴링
+  const screenPollingId = setInterval(async () => {
+    try {
+      const log = await getScreenLog(taskId);
+      if (log) {
+        onScreenLog(log);
+      }
+    } catch (err) {
+      onError(err, 'screen');
+    }
+  }, screenLogInterval);
+
+  // 플롯 로그 폴링
+  const plotPollingId = setInterval(async () => {
+    try {
+      const log = await getPlotLog(taskId);
+      if (log) {
+        onPlotLog(log);
+      }
+    } catch (err) {
+      onError(err, 'plot');
+    }
+  }, plotLogInterval);
+
+  // 폴링 ID 저장
+  state.pollingIntervals.set(`${taskId}-screen`, screenPollingId);
+  state.pollingIntervals.set(`${taskId}-plot`, plotPollingId);
+
+  return { screenPollingId, plotPollingId };
+};
+
+// 로그 폴링 중지
+export const stopLogPolling = (taskId) => {
+  const screenPollingId = state.pollingIntervals.get(`${taskId}-screen`);
+  const plotPollingId = state.pollingIntervals.get(`${taskId}-plot`);
+
+  if (screenPollingId) {
+    clearInterval(screenPollingId);
+    state.pollingIntervals.delete(`${taskId}-screen`);
+  }
+
+  if (plotPollingId) {
+    clearInterval(plotPollingId);
+    state.pollingIntervals.delete(`${taskId}-plot`);
   }
 };
 
-export default taskManagerService;
+// 스트리밍 방식으로 화면 로그 받기
+export const streamScreenLogs = (taskId, onData, onError) => {
+  const client = getClient();
+  const taskIdObj = new TaskId();
+  taskIdObj.setTaskId(taskId);
+
+  const stream = client.download_screen_log(taskIdObj);
+
+  stream.on('data', (response) => {
+    const logMsg = response.getLogMsg();
+    onData(logMsg);
+  });
+
+  stream.on('error', (err) => {
+    onError(err);
+  });
+
+  return stream;
+};
+
+// 모든 폴링 중지
+export const stopAllPolling = () => {
+  state.pollingIntervals.forEach((intervalId) => {
+    clearInterval(intervalId);
+  });
+  state.pollingIntervals.clear();
+};

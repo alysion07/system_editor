@@ -9,6 +9,7 @@ module.exports = {
         path: path.resolve(__dirname, 'dist'),
         filename: 'bundle.js',
     },
+    devtool: 'eval-source-map',
     module: {
         rules: [
             {
@@ -18,7 +19,8 @@ module.exports = {
                     loader: 'babel-loader',
                     options: {
                         presets: ['@babel/preset-env', ['@babel/preset-react', {
-                            runtime: 'automatic'
+                            runtime: 'automatic',
+                            sourcemap: true
                         }]]
                     }
                 }

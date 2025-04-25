@@ -1,183 +1,218 @@
+// components/TaskManager.js
 import React, { useState, useEffect } from 'react';
-import { TaskManagerClient } from '../../proto/task_manager_grpc_web_pb';
-import { TaskArgs, TaskId, TaskLog } from '../../proto/task_manager_pb';
-import { Empty } from 'google-protobuf/google/protobuf/empty_pb';
-
-// Define your service endpoint
-const SERVICE_URL = 'http://localhost:8080'; // Replace with your actual gRPC server URL
-const client = new TaskManagerClient(SERVICE_URL);
+import * as taskManagerService from '../services/taskManagerService';
 
 const TaskManager = () => {
-  const [taskId, setTaskId] = useState('');
-  const [logs, setLogs] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [args, setArgs] = useState('');
-  
-  // Start a new task
-  const handleStartTask = () => {
-    setIsLoading(true);
-    setError('');
-    
-    const taskArgs = new TaskArgs();
-    // Split the input args by comma and trim whitespace
-    const argsList = args.split(',').map(arg => arg.trim()).filter(arg => arg);
-    taskArgs.setArgsList(argsList);
-    
-    client.start_task(taskArgs, {}, (err, response) => {
-      setIsLoading(false);
-      
-      if (err) {
-        setError(`Error starting task: ${err.message}`);
-        return;
-      }
-      
-      const newTaskId = response.getTaskId();
-      setTaskId(newTaskId);
-      setLogs([`Task started with ID: ${newTaskId}`]);
-    });
-  };
-  
-  // Stop the current task
-  const handleStopTask = () => {
-    if (!taskId) return;
-    
-    setIsLoading(true);
-    setError('');
-    
-    const taskIdObj = new TaskId();
-    taskIdObj.setTaskId(taskId);
-    
-    client.stop_task(taskIdObj, {}, (err, response) => {
-      setIsLoading(false);
-      
-      if (err) {
-        setError(`Error stopping task: ${err.message}`);
-        return;
-      }
-      
-      setLogs(prev => [...prev, `Task ${taskId} stopped successfully`]);
-    });
-  };
-  
-  // Get the latest screen log
-  const handleGetLog = () => {
-    if (!taskId) return;
-    
-    setIsLoading(true);
-    setError('');
-    
-    const taskIdObj = new TaskId();
-    taskIdObj.setTaskId(taskId);
-    
-    client.get_screen_log(taskIdObj, {}, (err, response) => {
-      setIsLoading(false);
-      
-      if (err) {
-        setError(`Error getting log: ${err.message}`);
-        return;
-      }
-      
-      const logMsg = response.getLogMsg();
-      if (logMsg) {
-        setLogs(prev => [...prev, logMsg]);
-      }
-    });
-  };
-  
-  // Start streaming logs when a task is active
-  useEffect(() => {
-    if (!taskId) return;
-    
-    const taskIdObj = new TaskId();
-    taskIdObj.setTaskId(taskId);
-    
-    // Stream the screen logs
-    const stream = client.download_screen_log(taskIdObj);
-    
-    stream.on('data', (response) => {
-      const logMsg = response.getLogMsg();
-      setLogs(prev => [...prev, logMsg]);
-    });
-    
-    stream.on('error', (err) => {
-      setError(`Log streaming error: ${err.message}`);
-    });
-    
-    // Clean up the stream when component unmounts or taskId changes
-    return () => {
-      stream.cancel();
+    const [taskId, setTaskId] = useState('');
+    const [screenLogs, setScreenLogs] = useState([]);
+    const [plotLogs, setPlotLogs] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState('');
+    const [args, setArgs] = useState('');
+    const [useStreaming, setUseStreaming] = useState(false);
+
+    // 컴포넌트 마운트 시 서비스 초기화
+    useEffect(() => {
+        taskManagerService.initializeTaskManagerService();
+
+        // 컴포넌트 언마운트 시 모든 폴링 중지
+        return () => {
+            taskManagerService.stopAllPolling();
+        };
+    }, []);
+
+    // 태스크 시작
+    const handleStartTask = async () => {
+        setIsLoading(true);
+        setError('');
+
+        try {
+            const newTaskId = await taskManagerService.startTask(args);
+            setTaskId(newTaskId);
+            setScreenLogs([`Task started with ID: ${newTaskId}`]);
+            setPlotLogs([]);
+
+            // 폴링 시작
+            if (!useStreaming) {
+                taskManagerService.startLogPolling(newTaskId, {
+                    screenLogInterval: 3000,
+                    plotLogInterval: 5000,
+                    onScreenLog: (log) => {
+                        setScreenLogs(prev => [...prev, log]);
+                    },
+                    onPlotLog: (log) => {
+                        setPlotLogs(prev => [...prev, log]);
+                    },
+                    onError: (err, type) => {
+                        console.error(`Error polling ${type} log:`, err);
+                        setError(`${type} log polling error: ${err.message}`);
+                    }
+                });
+            }
+        } catch (err) {
+            setError(`Error starting task: ${err.message}`);
+        } finally {
+            setIsLoading(false);
+        }
     };
-  }, [taskId]);
-  
-  return (
-    <div className="task-manager">
-      <h2>Task Manager</h2>
-      
-      <div className="task-controls">
-        <div className="input-group">
-          <label htmlFor="args">Task Arguments (comma-separated):</label>
-          <input
-            id="args"
-            type="text"
-            value={args}
-            onChange={(e) => setArgs(e.target.value)}
-            placeholder="arg1, arg2, arg3"
-          />
+
+    // 태스크 ID 변경 시 이전 폴링 중지
+    useEffect(() => {
+        return () => {
+            if (taskId) {
+                taskManagerService.stopLogPolling(taskId);
+            }
+        };
+    }, [taskId]);
+
+    // 스트리밍 모드일 때 스트림 설정
+    useEffect(() => {
+        if (!taskId || !useStreaming) return;
+
+        const stream = taskManagerService.streamScreenLogs(
+            taskId,
+            (logMsg) => {
+                setScreenLogs(prev => [...prev, logMsg]);
+            },
+            (err) => {
+                setError(`Log streaming error: ${err.message}`);
+            }
+        );
+
+        return () => {
+            stream.cancel();
+        };
+    }, [taskId, useStreaming]);
+
+    // 수동으로 로그 가져오기
+    const handleGetScreenLog = async () => {
+        if (!taskId) return;
+
+        setIsLoading(true);
+        try {
+            const log = await taskManagerService.getScreenLog(taskId);
+            if (log) {
+                setScreenLogs(prev => [...prev, log]);
+            }
+        } catch (err) {
+            setError(`Error getting screen log: ${err.message}`);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleGetPlotLog = async () => {
+        if (!taskId) return;
+
+        setIsLoading(true);
+        try {
+            const log = await taskManagerService.getPlotLog(taskId);
+            if (log) {
+                setPlotLogs(prev => [...prev, log]);
+            }
+        } catch (err) {
+            setError(`Error getting plot log: ${err.message}`);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    return (
+        <div className="task-manager">
+            <h2>Task Manager</h2>
+
+            <div className="task-controls">
+                <div className="input-group">
+                    <label htmlFor="args">Task Arguments (comma-separated):</label>
+                    <input
+                        id="args"
+                        type="text"
+                        value={args}
+                        onChange={(e) => setArgs(e.target.value)}
+                        placeholder="arg1, arg2, arg3"
+                    />
+                </div>
+
+                <div className="mode-selector">
+                    <label>
+                        <input
+                            type="checkbox"
+                            checked={useStreaming}
+                            onChange={(e) => setUseStreaming(e.target.checked)}
+                        />
+                        Use Streaming Mode
+                    </label>
+                </div>
+
+                <div className="button-group">
+                    <button
+                        onClick={handleStartTask}
+                        disabled={isLoading || !args.trim()}
+                    >
+                        Start Task
+                    </button>
+
+                    {taskId && !useStreaming && (
+                        <>
+                            <button
+                                onClick={handleGetScreenLog}
+                                disabled={isLoading}
+                            >
+                                Get Screen Log Manually
+                            </button>
+
+                            <button
+                                onClick={handleGetPlotLog}
+                                disabled={isLoading}
+                            >
+                                Get Plot Log Manually
+                            </button>
+                        </>
+                    )}
+                </div>
+            </div>
+
+            {error && <div className="error-message">{error}</div>}
+
+            {taskId && (
+                <div className="task-info">
+                    <h3>Current Task ID: {taskId}</h3>
+                </div>
+            )}
+
+            <div className="logs-container">
+                <div className="screen-logs">
+                    <h3>Screen Logs:</h3>
+                    {screenLogs.length === 0 ? (
+                        <p>No screen logs available</p>
+                    ) : (
+                        <div className="logs-list">
+                            {screenLogs.map((log, index) => (
+                                <div key={index} className="log-entry">
+                                    {log}
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+
+                <div className="plot-logs">
+                    <h3>Plot Logs:</h3>
+                    {plotLogs.length === 0 ? (
+                        <p>No plot logs available</p>
+                    ) : (
+                        <div className="logs-list">
+                            {plotLogs.map((log, index) => (
+                                <div key={index} className="log-entry">
+                                    {log}
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            </div>
         </div>
-        
-        <div className="button-group">
-          <button 
-            onClick={handleStartTask}
-            disabled={isLoading || !args.trim()}
-          >
-            Start Task
-          </button>
-          
-          {taskId && (
-            <button 
-              onClick={handleStopTask}
-              disabled={isLoading}
-            >
-              Stop Task
-            </button>
-          )}
-          
-          {taskId && (
-            <button 
-              onClick={handleGetLog}
-              disabled={isLoading}
-            >
-              Get Latest Log
-            </button>
-          )}
-        </div>
-      </div>
-      
-      {error && <div className="error-message">{error}</div>}
-      
-      {taskId && (
-        <div className="task-info">
-          <h3>Current Task ID: {taskId}</h3>
-        </div>
-      )}
-      
-      <div className="logs-container">
-        <h3>Task Logs:</h3>
-        {logs.length === 0 ? (
-          <p>No logs available</p>
-        ) : (
-          <div className="logs-list">
-            {logs.map((log, index) => (
-              <div key={index} className="log-entry">
-                {log}
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  );
+    );
 };
 
 export default TaskManager;
