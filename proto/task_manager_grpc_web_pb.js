@@ -81,7 +81,7 @@ proto.task.TaskManagerPromiseClient =
  *   !proto.task.TaskId>}
  */
 const methodDescriptor_TaskManager_start_task = new grpc.web.MethodDescriptor(
-  '/task.TaskManager_backup/start_task',
+  '/task.TaskManager/start_task',
   grpc.web.MethodType.UNARY,
   proto.task.TaskArgs,
   proto.task.TaskId,
@@ -109,7 +109,7 @@ const methodDescriptor_TaskManager_start_task = new grpc.web.MethodDescriptor(
 proto.task.TaskManagerClient.prototype.start_task =
     function(request, metadata, callback) {
   return this.client_.rpcCall(this.hostname_ +
-      '/task.TaskManager_backup/start_task',
+      '/task.TaskManager/start_task',
       request,
       metadata || {},
       methodDescriptor_TaskManager_start_task,
@@ -128,7 +128,7 @@ proto.task.TaskManagerClient.prototype.start_task =
 proto.task.TaskManagerPromiseClient.prototype.start_task =
     function(request, metadata) {
   return this.client_.unaryCall(this.hostname_ +
-      '/task.TaskManager_backup/start_task',
+      '/task.TaskManager/start_task',
       request,
       metadata || {},
       methodDescriptor_TaskManager_start_task);
@@ -142,7 +142,7 @@ proto.task.TaskManagerPromiseClient.prototype.start_task =
  *   !proto.google.protobuf.Empty>}
  */
 const methodDescriptor_TaskManager_stop_task = new grpc.web.MethodDescriptor(
-  '/task.TaskManager_backup/stop_task',
+  '/task.TaskManager/stop_task',
   grpc.web.MethodType.UNARY,
   proto.task.TaskId,
   google_protobuf_empty_pb.Empty,
@@ -170,7 +170,7 @@ const methodDescriptor_TaskManager_stop_task = new grpc.web.MethodDescriptor(
 proto.task.TaskManagerClient.prototype.stop_task =
     function(request, metadata, callback) {
   return this.client_.rpcCall(this.hostname_ +
-      '/task.TaskManager_backup/stop_task',
+      '/task.TaskManager/stop_task',
       request,
       metadata || {},
       methodDescriptor_TaskManager_stop_task,
@@ -189,7 +189,7 @@ proto.task.TaskManagerClient.prototype.stop_task =
 proto.task.TaskManagerPromiseClient.prototype.stop_task =
     function(request, metadata) {
   return this.client_.unaryCall(this.hostname_ +
-      '/task.TaskManager_backup/stop_task',
+      '/task.TaskManager/stop_task',
       request,
       metadata || {},
       methodDescriptor_TaskManager_stop_task);
@@ -203,7 +203,7 @@ proto.task.TaskManagerPromiseClient.prototype.stop_task =
  *   !proto.task.LogMessage>}
  */
 const methodDescriptor_TaskManager_get_eol = new grpc.web.MethodDescriptor(
-  '/task.TaskManager_backup/get_eol',
+  '/task.TaskManager/get_eol',
   grpc.web.MethodType.UNARY,
   google_protobuf_empty_pb.Empty,
   proto.task.LogMessage,
@@ -231,7 +231,7 @@ const methodDescriptor_TaskManager_get_eol = new grpc.web.MethodDescriptor(
 proto.task.TaskManagerClient.prototype.get_eol =
     function(request, metadata, callback) {
   return this.client_.rpcCall(this.hostname_ +
-      '/task.TaskManager_backup/get_eol',
+      '/task.TaskManager/get_eol',
       request,
       metadata || {},
       methodDescriptor_TaskManager_get_eol,
@@ -250,7 +250,7 @@ proto.task.TaskManagerClient.prototype.get_eol =
 proto.task.TaskManagerPromiseClient.prototype.get_eol =
     function(request, metadata) {
   return this.client_.unaryCall(this.hostname_ +
-      '/task.TaskManager_backup/get_eol',
+      '/task.TaskManager/get_eol',
       request,
       metadata || {},
       methodDescriptor_TaskManager_get_eol);
@@ -264,7 +264,7 @@ proto.task.TaskManagerPromiseClient.prototype.get_eol =
  *   !proto.task.LogMessage>}
  */
 const methodDescriptor_TaskManager_download_plot_log = new grpc.web.MethodDescriptor(
-  '/task.TaskManager_backup/download_plot_log',
+  '/task.TaskManager/download_plot_log',
   grpc.web.MethodType.SERVER_STREAMING,
   proto.task.TaskId,
   proto.task.LogMessage,
@@ -289,7 +289,7 @@ const methodDescriptor_TaskManager_download_plot_log = new grpc.web.MethodDescri
 proto.task.TaskManagerClient.prototype.download_plot_log =
     function(request, metadata) {
   return this.client_.serverStreaming(this.hostname_ +
-      '/task.TaskManager_backup/download_plot_log',
+      '/task.TaskManager/download_plot_log',
       request,
       metadata || {},
       methodDescriptor_TaskManager_download_plot_log);
@@ -306,7 +306,7 @@ proto.task.TaskManagerClient.prototype.download_plot_log =
 proto.task.TaskManagerPromiseClient.prototype.download_plot_log =
     function(request, metadata) {
   return this.client_.serverStreaming(this.hostname_ +
-      '/task.TaskManager_backup/download_plot_log',
+      '/task.TaskManager/download_plot_log',
       request,
       metadata || {},
       methodDescriptor_TaskManager_download_plot_log);
@@ -320,7 +320,7 @@ proto.task.TaskManagerPromiseClient.prototype.download_plot_log =
  *   !proto.task.LogMessage>}
  */
 const methodDescriptor_TaskManager_get_plot_log = new grpc.web.MethodDescriptor(
-  '/task.TaskManager_backup/get_plot_log',
+  '/task.TaskManager/get_plot_log',
   grpc.web.MethodType.UNARY,
   proto.task.TaskId,
   proto.task.LogMessage,
@@ -348,7 +348,7 @@ const methodDescriptor_TaskManager_get_plot_log = new grpc.web.MethodDescriptor(
 proto.task.TaskManagerClient.prototype.get_plot_log =
     function(request, metadata, callback) {
   return this.client_.rpcCall(this.hostname_ +
-      '/task.TaskManager_backup/get_plot_log',
+      '/task.TaskManager/get_plot_log',
       request,
       metadata || {},
       methodDescriptor_TaskManager_get_plot_log,
@@ -367,7 +367,7 @@ proto.task.TaskManagerClient.prototype.get_plot_log =
 proto.task.TaskManagerPromiseClient.prototype.get_plot_log =
     function(request, metadata) {
   return this.client_.unaryCall(this.hostname_ +
-      '/task.TaskManager_backup/get_plot_log',
+      '/task.TaskManager/get_plot_log',
       request,
       metadata || {},
       methodDescriptor_TaskManager_get_plot_log);
@@ -381,7 +381,7 @@ proto.task.TaskManagerPromiseClient.prototype.get_plot_log =
  *   !proto.task.LogMessage>}
  */
 const methodDescriptor_TaskManager_download_screen_log = new grpc.web.MethodDescriptor(
-  '/task.TaskManager_backup/download_screen_log',
+  '/task.TaskManager/download_screen_log',
   grpc.web.MethodType.SERVER_STREAMING,
   proto.task.TaskId,
   proto.task.LogMessage,
@@ -406,7 +406,7 @@ const methodDescriptor_TaskManager_download_screen_log = new grpc.web.MethodDesc
 proto.task.TaskManagerClient.prototype.download_screen_log =
     function(request, metadata) {
   return this.client_.serverStreaming(this.hostname_ +
-      '/task.TaskManager_backup/download_screen_log',
+      '/task.TaskManager/download_screen_log',
       request,
       metadata || {},
       methodDescriptor_TaskManager_download_screen_log);
@@ -423,7 +423,7 @@ proto.task.TaskManagerClient.prototype.download_screen_log =
 proto.task.TaskManagerPromiseClient.prototype.download_screen_log =
     function(request, metadata) {
   return this.client_.serverStreaming(this.hostname_ +
-      '/task.TaskManager_backup/download_screen_log',
+      '/task.TaskManager/download_screen_log',
       request,
       metadata || {},
       methodDescriptor_TaskManager_download_screen_log);
@@ -437,7 +437,7 @@ proto.task.TaskManagerPromiseClient.prototype.download_screen_log =
  *   !proto.task.LogMessage>}
  */
 const methodDescriptor_TaskManager_get_screen_log = new grpc.web.MethodDescriptor(
-  '/task.TaskManager_backup/get_screen_log',
+  '/task.TaskManager/get_screen_log',
   grpc.web.MethodType.UNARY,
   proto.task.TaskId,
   proto.task.LogMessage,
@@ -465,7 +465,7 @@ const methodDescriptor_TaskManager_get_screen_log = new grpc.web.MethodDescripto
 proto.task.TaskManagerClient.prototype.get_screen_log =
     function(request, metadata, callback) {
   return this.client_.rpcCall(this.hostname_ +
-      '/task.TaskManager_backup/get_screen_log',
+      '/task.TaskManager/get_screen_log',
       request,
       metadata || {},
       methodDescriptor_TaskManager_get_screen_log,
@@ -484,7 +484,7 @@ proto.task.TaskManagerClient.prototype.get_screen_log =
 proto.task.TaskManagerPromiseClient.prototype.get_screen_log =
     function(request, metadata) {
   return this.client_.unaryCall(this.hostname_ +
-      '/task.TaskManager_backup/get_screen_log',
+      '/task.TaskManager/get_screen_log',
       request,
       metadata || {},
       methodDescriptor_TaskManager_get_screen_log);
@@ -498,7 +498,7 @@ proto.task.TaskManagerPromiseClient.prototype.get_screen_log =
  *   !proto.google.protobuf.Empty>}
  */
 const methodDescriptor_TaskManager_upload_screen_log = new grpc.web.MethodDescriptor(
-  '/task.TaskManager_backup/upload_screen_log',
+  '/task.TaskManager/upload_screen_log',
   grpc.web.MethodType.UNARY,
   proto.task.TaskLog,
   google_protobuf_empty_pb.Empty,
@@ -526,7 +526,7 @@ const methodDescriptor_TaskManager_upload_screen_log = new grpc.web.MethodDescri
 proto.task.TaskManagerClient.prototype.upload_screen_log =
     function(request, metadata, callback) {
   return this.client_.rpcCall(this.hostname_ +
-      '/task.TaskManager_backup/upload_screen_log',
+      '/task.TaskManager/upload_screen_log',
       request,
       metadata || {},
       methodDescriptor_TaskManager_upload_screen_log,
@@ -545,7 +545,7 @@ proto.task.TaskManagerClient.prototype.upload_screen_log =
 proto.task.TaskManagerPromiseClient.prototype.upload_screen_log =
     function(request, metadata) {
   return this.client_.unaryCall(this.hostname_ +
-      '/task.TaskManager_backup/upload_screen_log',
+      '/task.TaskManager/upload_screen_log',
       request,
       metadata || {},
       methodDescriptor_TaskManager_upload_screen_log);

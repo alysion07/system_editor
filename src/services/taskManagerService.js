@@ -78,8 +78,8 @@ export const getPlotLog = (taskId) => {
 // 로그 폴링 시작
 export const startLogPolling = (taskId, options = {}) => {
   const {
-    screenLogInterval = 5000,
-    plotLogInterval = 10000,
+    screenLogInterval = 1000,
+    plotLogInterval = 1000,
     onScreenLog = () => {},
     onPlotLog = () => {},
     onError = () => {}

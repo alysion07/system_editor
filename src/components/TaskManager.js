@@ -35,8 +35,8 @@ const TaskManager = () => {
             // 폴링 시작
             if (!useStreaming) {
                 taskManagerService.startLogPolling(newTaskId, {
-                    screenLogInterval: 3000,
-                    plotLogInterval: 5000,
+                    screenLogInterval: 500,
+                    plotLogInterval: 500,
                     onScreenLog: (log) => {
                         setScreenLogs(prev => [...prev, log]);
                     },
