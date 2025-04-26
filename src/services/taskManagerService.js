@@ -6,7 +6,8 @@ import { Empty } from 'google-protobuf/google/protobuf/empty_pb';
 // 전역 상태 관리
 const state = {
   client: null,
-  pollingIntervals: new Map()
+  pollingIntervals: new Map(),
+  eol: ''
 };
 
 // 초기화 함수
@@ -75,11 +76,145 @@ export const getPlotLog = (taskId) => {
   });
 };
 
+// 연속 플롯 로그 수집
+export const getPlotLogsUntilEOL = async (taskId, onLog, onComplete) => {
+  try {
+    const eol = await getEOL(taskId);
+    console.log('Plot EOL:', eol);
+
+    while (true) {
+      const plotLog = await getPlotLog(taskId);
+      if (plotLog === eol) {
+        onComplete();
+        break;
+      }
+      if (plotLog) {
+        onLog(plotLog);
+      }
+      // 서버 부하 방지를 위한 짧은 대기
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+  } catch (err) {
+    throw err;
+  }
+};
+
+// 연속 화면 로그 수집
+export const getScreenLogsUntilEOL = async (taskId, onLog, onComplete) => {
+  try {
+    const eol = await getEOL(taskId);
+    console.log('Screen EOL:', eol);
+
+    while (true) {
+      const screenLog = await getScreenLog(taskId);
+      if (screenLog === eol) {
+        onComplete();
+        break;
+      }
+      if (screenLog) {
+        onLog(screenLog);
+      }
+      // 서버 부하 방지를 위한 짧은 대기
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+  } catch (err) {
+    throw err;
+  }
+};
+
+
+// 플롯 로그 가져오기
+export const getEOL = (taskId) => {
+  return new Promise((resolve, reject) => {
+    const client = getClient();
+    const taskIdObj = new TaskId();
+    taskIdObj.setTaskId(taskId);
+
+    client.get_eol(taskIdObj, {}, (err, response) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      resolve(response.getLogMsg());
+    });
+  });
+};
+
+// 동시에 두 로그 수집 시작
+export const startContinuousLogging = (taskId, options = {}) => {
+  const {
+    onScreenLog = () => {},
+    onPlotLog = () => {},
+    onScreenComplete = () => {},
+    onPlotComplete = () => {},
+    onError = () => {}
+  } = options;
+
+  const controllers = {
+    screen: { abort: false },
+    plot: { abort: false }
+  };
+
+  // 화면 로그 수집 시작
+  const screenLogging = async () => {
+    try {
+      const eol = await getEOL(taskId);
+      while (!controllers.screen.abort) {
+        const screenLog = await getScreenLog(taskId);
+        if (screenLog === eol) {
+          onScreenComplete();
+          break;
+        }
+        if (screenLog) {
+          onScreenLog(screenLog);
+        }
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+    } catch (err) {
+      if (!controllers.screen.abort) {
+        onError(err, 'screen');
+      }
+    }
+  };
+
+  // 플롯 로그 수집 시작
+  const plotLogging = async () => {
+    try {
+      const eol = await getEOL(taskId);
+      while (!controllers.plot.abort) {
+        const plotLog = await getPlotLog(taskId);
+        if (plotLog === eol) {
+          onPlotComplete();
+          break;
+        }
+        if (plotLog) {
+          onPlotLog(plotLog);
+        }
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+    } catch (err) {
+      if (!controllers.plot.abort) {
+        onError(err, 'plot');
+      }
+    }
+  };
+
+  // 비동기로 실행
+  screenLogging();
+  plotLogging();
+
+  // 중단 함수 반환
+  return () => {
+    controllers.screen.abort = true;
+    controllers.plot.abort = true;
+  };
+};
+
 // 로그 폴링 시작
 export const startLogPolling = (taskId, options = {}) => {
   const {
     screenLogInterval = 1000,
-    plotLogInterval = 1000,
+    plotLogInterval = 300,
     onScreenLog = () => {},
     onPlotLog = () => {},
     onError = () => {}

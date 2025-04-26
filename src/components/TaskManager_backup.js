@@ -6,6 +6,7 @@ import { Empty } from 'google-protobuf/google/protobuf/empty_pb';
 // Define your service endpoint
 const SERVICE_URL = 'http://129.254.222.219:8443';
 const client = new TaskManagerClient(SERVICE_URL);
+console.log(client);
 
 const TaskManager_backup = () => {
   const [taskId, setTaskId] = useState('');
@@ -40,7 +41,7 @@ const TaskManager_backup = () => {
   };
   
   const handleGetLog = () => {
-    if (!taskId) return;
+   // if (!taskId) return;
 
     setIsLoading(true);
     setError('');
@@ -133,14 +134,13 @@ const TaskManager_backup = () => {
           >
             Start Task
           </button>
-          
-          {taskId && (
-            <button 
+            <button
               onClick={handleGetLog}
               disabled={isLoading}
             >
+            Get Logs
             </button>
-          )}
+
         </div>
       </div>
       

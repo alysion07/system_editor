@@ -10,6 +10,9 @@ const TaskManager = () => {
     const [error, setError] = useState('');
     const [args, setArgs] = useState('');
     const [useStreaming, setUseStreaming] = useState(false);
+    const [isTaskCompleted, setIsTaskCompleted] = useState(false);
+    const [loggingControllers, setLoggingControllers] = useState(null);
+
 
     // 컴포넌트 마운트 시 서비스 초기화
     useEffect(() => {
@@ -21,10 +24,20 @@ const TaskManager = () => {
         };
     }, []);
 
+    // 컴포넌트 언마운트 시 로깅 중단
+    useEffect(() => {
+        return () => {
+            if (loggingControllers) {
+                loggingControllers();
+            }
+        };
+    }, [loggingControllers]);
+
     // 태스크 시작
     const handleStartTask = async () => {
         setIsLoading(true);
         setError('');
+        setIsTaskCompleted(false);
 
         try {
             const newTaskId = await taskManagerService.startTask(args);
@@ -32,57 +45,35 @@ const TaskManager = () => {
             setScreenLogs([`Task started with ID: ${newTaskId}`]);
             setPlotLogs([]);
 
-            // 폴링 시작
-            if (!useStreaming) {
-                taskManagerService.startLogPolling(newTaskId, {
-                    screenLogInterval: 500,
-                    plotLogInterval: 500,
-                    onScreenLog: (log) => {
-                        setScreenLogs(prev => [...prev, log]);
-                    },
-                    onPlotLog: (log) => {
-                        setPlotLogs(prev => [...prev, log]);
-                    },
-                    onError: (err, type) => {
-                        console.error(`Error polling ${type} log:`, err);
-                        setError(`${type} log polling error: ${err.message}`);
-                    }
-                });
-            }
+            // 연속 로깅 시작
+            const stopLogging = taskManagerService.startContinuousLogging(newTaskId, {
+                onScreenLog: (log) => {
+                    setScreenLogs(prev => [...prev, log]);
+                },
+                onPlotLog: (log) => {
+                    setPlotLogs(prev => [...prev, log]);
+                },
+                onScreenComplete: () => {
+                    setScreenLogs(prev => [...prev, "Screen logging completed"]);
+                },
+                onPlotComplete: () => {
+                    setPlotLogs(prev => [...prev, "Plot logging completed"]);
+                    setIsTaskCompleted(true);
+                },
+                onError: (err, type) => {
+                    console.error(`Error in ${type} logging:`, err);
+                    setError(`${type} logging error: ${err.message}`);
+                }
+            });
+
+            setLoggingControllers(stopLogging);
+
         } catch (err) {
             setError(`Error starting task: ${err.message}`);
         } finally {
             setIsLoading(false);
         }
     };
-
-    // 태스크 ID 변경 시 이전 폴링 중지
-    useEffect(() => {
-        return () => {
-            if (taskId) {
-                taskManagerService.stopLogPolling(taskId);
-            }
-        };
-    }, [taskId]);
-
-    // 스트리밍 모드일 때 스트림 설정
-    useEffect(() => {
-        if (!taskId || !useStreaming) return;
-
-        const stream = taskManagerService.streamScreenLogs(
-            taskId,
-            (logMsg) => {
-                setScreenLogs(prev => [...prev, logMsg]);
-            },
-            (err) => {
-                setError(`Log streaming error: ${err.message}`);
-            }
-        );
-
-        return () => {
-            stream.cancel();
-        };
-    }, [taskId, useStreaming]);
 
     // 수동으로 로그 가져오기
     const handleGetScreenLog = async () => {
@@ -152,7 +143,7 @@ const TaskManager = () => {
                         Start Task
                     </button>
 
-                    {taskId && !useStreaming && (
+
                         <>
                             <button
                                 onClick={handleGetScreenLog}
@@ -168,7 +159,6 @@ const TaskManager = () => {
                                 Get Plot Log Manually
                             </button>
                         </>
-                    )}
                 </div>
             </div>
 
@@ -211,6 +201,12 @@ const TaskManager = () => {
                     )}
                 </div>
             </div>
+
+            {isTaskCompleted && (
+                <div className="task-completed">
+                    Task has been completed successfully!
+                </div>
+            )}
         </div>
     );
 };
