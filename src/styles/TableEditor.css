@@ -1,0 +1,250 @@
+/* TableEditor 컴포넌트 스타일 */
+
+.table-editor {
+    width: 100%;
+    margin: 20px 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* 툴바 스타일 */
+.table-toolbar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.btn {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+.btn:active {
+    transform: translateY(1px);
+}
+
+.btn:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+.add-button {
+    background-color: #4caf50;
+    color: white;
+}
+
+.add-button:hover:not(:disabled) {
+    background-color: #45a049;
+}
+
+.import-button, .export-button {
+    background-color: #2196F3;
+    color: white;
+}
+
+.import-button:hover:not(:disabled), .export-button:hover:not(:disabled) {
+    background-color: #0b7dda;
+}
+
+.interpolate-button {
+    background-color: #9c27b0;
+    color: white;
+}
+
+.interpolate-button:hover:not(:disabled) {
+    background-color: #7B1FA2;
+}
+
+.delete-button {
+    background-color: #f44336;
+    color: white;
+    padding: 4px 8px;
+    font-size: 12px;
+}
+
+.delete-button:hover:not(:disabled) {
+    background-color: #d32f2f;
+}
+
+/* 테이블 스타일 */
+.table-container {
+    width: 100%;
+    overflow-x: auto;
+    margin-bottom: 20px;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.data-table th,
+.data-table td {
+    border: 1px solid #e0e0e0;
+    padding: 8px 12px;
+    text-align: left;
+}
+
+.data-table th {
+    background-color: #f5f5f5;
+    font-weight: bold;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.data-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.data-table tr:hover {
+    background-color: #f0f0f0;
+}
+
+/* 셀 편집 스타일 */
+.cell-value {
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 2px;
+    transition: background-color 0.2s;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.cell-value:hover {
+    background-color: #e3f2fd;
+}
+
+.cell-input {
+    width: 100%;
+    padding: 4px;
+    border: 1px solid #2196F3;
+    border-radius: 2px;
+    font-size: 14px;
+    outline: none;
+}
+
+.unit {
+    color: #757575;
+    font-size: 12px;
+    margin-left: 4px;
+}
+
+/* 차트 스타일 */
+.chart-container {
+    margin-top: 20px;
+    padding: 15px;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    background-color: #f9f9f9;
+}
+
+.data-chart {
+    width: 100%;
+    max-width: 100%;
+    background-color: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+}
+
+/* 모달 스타일 */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.import-modal {
+    background-color: white;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 600px;
+    padding: 20px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.import-modal h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #333;
+    font-size: 18px;
+}
+
+.modal-description {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 15px;
+}
+
+.import-textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 14px;
+    margin-bottom: 15px;
+    resize: vertical;
+}
+
+.modal-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.import-confirm {
+    background-color: #4caf50;
+    color: white;
+}
+
+.import-confirm:hover {
+    background-color: #45a049;
+}
+
+.cancel-button {
+    background-color: #f44336;
+    color: white;
+}
+
+.cancel-button:hover {
+    background-color: #d32f2f;
+}
+
+/* 반응형 스타일 */
+@media screen and (max-width: 768px) {
+    .table-toolbar {
+        flex-direction: column;
+    }
+
+    .table-toolbar .btn {
+        width: 100%;
+    }
+
+    .modal-overlay {
+        padding: 0 15px;
+    }
+
+    .modal-buttons {
+        flex-direction: column;
+    }
+
+    .modal-buttons .btn {
+        width: 100%;
+    }
+}

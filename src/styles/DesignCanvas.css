@@ -1,0 +1,31 @@
+/* File: src/styles/DesignCanvas.css */
+.design-canvas {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    background-color: #f8f9fa;
+    overflow: hidden;
+}
+
+.canvas-grid {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-size: 20px 20px;
+    background-image:
+            linear-gradient(to right, #eee 1px, transparent 1px),
+            linear-gradient(to bottom, #eee 1px, transparent 1px);
+    z-index: 0;
+}
+
+.canvas-content {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    transform-origin: 0 0;
+}

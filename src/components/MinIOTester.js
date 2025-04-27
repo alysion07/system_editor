@@ -1,16 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { S3Client, ListBucketsCommand, ListObjectsV2Command, GetObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-
-const client = new S3Client({
-    region: 'us-east-1',
-    endpoint: 'http://121.148.223.175:9010',
-    credentials: {
-        accessKeyId: 'minio',
-        secretAccessKey: 'minio123',
-    },
-    forcePathStyle: true,
-});
+import { listBuckets, listFilesInBucket, generatePresignedDownloadUrl, uploadToMinio } from '../services/minioService';
 
 const MinioManager = () => {
     const [status, setStatus] = useState('확인 중...');
@@ -23,9 +12,9 @@ const MinioManager = () => {
     useEffect(() => {
         const fetchBuckets = async () => {
             try {
-                const result = await client.send(new ListBucketsCommand({}));
+                const bucketList = await listBuckets();
                 setStatus('✅ MinIO 연결 성공!');
-                setBuckets(result.Buckets || []);
+                setBuckets(bucketList);
             } catch (err) {
                 console.error(err);
                 setStatus(`❌ 연결 실패: ${err.name} - ${err.message}`);
@@ -37,16 +26,8 @@ const MinioManager = () => {
 
     const fetchFiles = async (bucketName) => {
         try {
-            const command = new ListObjectsV2Command({
-                Bucket: bucketName,
-            });
-
-            const response = await client.send(command);
-            if (response.Contents) {
-                setFiles(response.Contents.map((item) => item.Key));
-            } else {
-                setFiles([]);
-            }
+            const fileList = await listFilesInBucket(bucketName);
+            setFiles(fileList);
             setSelectedBucket(bucketName);
         } catch (error) {
             console.error('파일 가져오기 실패:', error);
@@ -55,12 +36,7 @@ const MinioManager = () => {
 
     const handleDownload = async (fileName) => {
         try {
-            const command = new GetObjectCommand({
-                Bucket: selectedBucket,
-                Key: fileName,
-            });
-
-            const url = await getSignedUrl(client, command, { expiresIn: 3600 });
+            const url = await generatePresignedDownloadUrl(selectedBucket, fileName);
             window.open(url, '_blank');
         } catch (error) {
             console.error('다운로드 URL 생성 실패:', error);
@@ -78,15 +54,9 @@ const MinioManager = () => {
         }
 
         try {
-            const command = new PutObjectCommand({
-                Bucket: selectedBucket,
-                Key: uploadPath,
-                Body: uploadFile,
-            });
-
-            await client.send(command);
+            await uploadToMinio(selectedBucket, uploadPath, uploadFile);
             alert('업로드 성공!');
-            fetchFiles(selectedBucket); // 업로드 후 파일 목록 새로고침
+            fetchFiles(selectedBucket);
         } catch (error) {
             console.error('업로드 실패:', error);
         }

@@ -1,0 +1,331 @@
+/* MARS 열구조체 입력 인터페이스 스타일시트 */
+
+.heat-structure {
+    --primary-color: #3498db;
+    --secondary-color: #2980b9;
+    --background-color: #f5f5f5;
+    --panel-color: #ffffff;
+    --border-color: #dddddd;
+    --success-color: #2ecc71;
+    --warning-color: #e67e22;
+    --danger-color: #e74c3c;
+    --text-color: #333333;
+    --light-text-color: #666666;
+}
+
+/* 기본 레이아웃 */
+.heat-structure {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: var(--background-color);
+    color: var(--text-color);
+}
+
+.heat-structure .container {
+    width: 95%;
+    max-width: 1200px;
+    margin: 20px auto;
+    background-color: var(--panel-color);
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+/* 헤더 스타일 */
+.heat-structure .header {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 20px;
+    text-align: center;
+}
+
+.heat-structure .header-title {
+    margin: 0;
+    font-size: 20px;
+}
+
+/* 탭 네비게이션 */
+.heat-structure .tabs {
+    display: flex;
+    background-color: var(--secondary-color);
+    font-size: 14px;
+}
+
+.heat-structure .tab {
+    padding: 5px 5px;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    text-align: center;
+    flex: 1;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.heat-structure .tab:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.heat-structure .tab.active {
+    background-color: var(--panel-color);
+    color: var(--primary-color);
+    font-weight: bold;
+}
+
+/* 탭 콘텐츠 영역 */
+.heat-structure .content-container {
+    padding: 20px;
+}
+
+.heat-structure .tab-content {
+    display: block;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* 섹션 제목 */
+.heat-structure .section-title {
+    font-size: 1rem;
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: var(--primary-color);
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 8px;
+}
+
+.heat-structure .sub-section-title {
+    font-size: 1rem;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    color: var(--secondary-color);
+}
+
+/* 정보 박스 */
+.heat-structure .info-box {
+    background-color: #d4edff;
+    border-left: 4px solid var(--primary-color);
+    padding: 10px 15px;
+    margin-bottom: 15px;
+    border-radius: 0 4px 4px 0;
+}
+
+.heat-structure .warning-box {
+    background-color: #fff3cd;
+    border-left: 4px solid var(--warning-color);
+    padding: 10px 15px;
+    margin-bottom: 15px;
+    border-radius: 0 4px 4px 0;
+}
+
+/* 폼 요소 스타일 */
+.heat-structure .form-group {
+    margin-bottom: 15px;
+}
+
+.heat-structure .field-label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.heat-structure .field-input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.heat-structure .field-input:focus {
+    border-color: var(--primary-color);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.25);
+}
+
+.heat-structure .field-input.has-error {
+    border-color: var(--danger-color);
+}
+
+.heat-structure .helper-text {
+    font-size: 12px;
+    color: var(--light-text-color);
+    margin-top: 4px;
+}
+
+.heat-structure .input-group {
+    display: flex;
+    gap: 10px;
+}
+
+/* 버튼 스타일 */
+.heat-structure .btn {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s;
+}
+
+.heat-structure .btn:hover {
+    background-color: var(--secondary-color);
+}
+
+.heat-structure .btn:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+.heat-structure .btn-success {
+    background-color: var(--success-color);
+}
+
+.heat-structure .btn-success:hover {
+    background-color: #27ae60;
+}
+
+/* 테이블 스타일 */
+.heat-structure .table-container {
+    width: 100%;
+    overflow-x: auto;
+    margin-bottom: 15px;
+}
+
+.heat-structure .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.heat-structure .data-table th,
+.heat-structure .data-table td {
+    border: 1px solid var(--border-color);
+    padding: 8px;
+    text-align: left;
+}
+
+.heat-structure .data-table th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+}
+
+.heat-structure .data-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.heat-structure .data-table tr:hover {
+    background-color: #f0f0f0;
+}
+
+/* 메시 시각화 스타일 */
+.heat-structure .mesh-visualizer {
+    margin-top: 20px;
+    padding: 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background-color: #f8f8f8;
+}
+
+.heat-structure .mesh-canvas {
+    width: 100%;
+    border: 1px solid var(--border-color);
+    background-color: white;
+    border-radius: 4px;
+}
+
+.heat-structure .mesh-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 5px;
+    font-size: 12px;
+    color: var(--light-text-color);
+}
+
+/* 생성된 입력 텍스트 표시 영역 */
+.heat-structure .result-section {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+}
+
+.heat-structure .generated-input {
+    width: 100%;
+    min-height: 200px;
+    font-family: monospace;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    background-color: #f8f8f8;
+    white-space: pre;
+    overflow-x: auto;
+    margin-bottom: 15px;
+    font-size: 14px;
+    border-radius: 4px;
+}
+
+/* 알림 스타일 */
+.heat-structure .notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 20px;
+    background-color: var(--success-color);
+    color: white;
+    border-radius: 4px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    transform: translateX(200%);
+    transition: transform 0.3s ease-out;
+    z-index: 1000;
+}
+
+.heat-structure .notification.show {
+    transform: translateX(0);
+}
+
+/* 열물성 데이터 탭 스타일 */
+.heat-structure .material-properties {
+    display: none;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    margin-top: 10px;
+    background-color: #fafafa;
+}
+
+.heat-structure .material-properties.active {
+    display: block;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+/* 반응형 스타일 */
+@media screen and (max-width: 768px) {
+    .heat-structure .container {
+        width: 100%;
+        margin: 0;
+        border-radius: 0;
+    }
+
+    .heat-structure .tabs {
+        flex-direction: column;
+    }
+
+    .heat-structure .tab {
+        padding: 10px;
+    }
+
+    .heat-structure .input-group {
+        flex-direction: column;
+    }
+
+    .heat-structure .btn {
+        width: 100%;
+        margin-top: 5px;
+    }
+}

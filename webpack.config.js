@@ -40,7 +40,8 @@ module.exports = {
         fallback: {
             "buffer": require.resolve("buffer/"),
             "util": require.resolve("util/"),
-            "stream": require.resolve("stream-browserify")
+            "stream": require.resolve("stream-browserify"),
+            'process/browser': require.resolve('process/browser')
         }
     },
     plugins: [

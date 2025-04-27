@@ -1,0 +1,57 @@
+/* File: src/styles/ComponentPalette.css */
+.component-palette {
+    padding: 16px;
+}
+
+.component-palette h2 {
+    margin-top: 0;
+    font-size: 18px;
+    color: #333;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #ddd;
+}
+
+.palette-category {
+    margin-bottom: 16px;
+}
+
+.category-title {
+    font-size: 14px;
+    font-weight: 600;
+    margin: 10px 0;
+    color: #666;
+}
+
+.palette-items {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+}
+
+.palette-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 8px;
+    cursor: grab;
+    user-select: none;
+}
+
+.palette-item:hover {
+    background-color: #f5f9ff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.palette-item-icon {
+    font-size: 24px;
+    margin-bottom: 4px;
+}
+
+.palette-item-label {
+    font-size: 12px;
+    text-align: center;
+}

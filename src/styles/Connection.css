@@ -1,0 +1,36 @@
+/* File: src/styles/Connection.css */
+.connection path {
+    pointer-events: stroke;
+    transition: stroke-width 0.2s;
+}
+
+.connection:hover path {
+    stroke-width: 3px;
+}
+
+.connection-delete-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 50%;
+    font-size: 14px;
+    cursor: pointer;
+    color: #e74c3c;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.connection:hover .connection-delete-btn {
+    opacity: 1;
+}
+
+.connection-delete-btn:hover {
+    background-color: #e74c3c;
+    color: white;
+    border-color: #e74c3c;
+}
