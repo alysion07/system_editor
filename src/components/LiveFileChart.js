@@ -10,18 +10,19 @@ const headers = [
     'p1','p2',
     'voidg1','voidg2','voidg3','voidg4','voidg5','voidg6','voidg7','voidg8','voidg9','voidg10','voidg11','voidg12',
     'httemp1','httemp2','httemp3','httemp4',
-    'hthtc1','hthtc2','hthtc3','hthtc4','hthtc5','hthtc6','hthtc7','hthtc8','hthtc9','hthtc10','hthtc11',
-    'cntrlvar'
+    'hthtc1','hthtc2','hthtc3','hthtc4','hthtc5','hthtc6','hthtc7','hthtc8','hthtc9','hthtc10',
+    // 'cntrlvar'
 ];
 
 const groups = {
     mflowj: ['mflowj1','mflowj2','mflowj3'],
-    tempf: ['tempf1','tempf2','tempf3','tempf4','tempf5','tempf6','tempf7','tempf8','tempf9','tempf10','tempf11','tempf12','tempf13','tempf14'],
+    tempf0: ['tempf1','tempf2'],
+    tempf: ['tempf3','tempf4','tempf5','tempf6','tempf7','tempf8','tempf9','tempf10','tempf11','tempf12','tempf13','tempf14'],
     p: ['p1','p2'],
     voidg: ['voidg1','voidg2','voidg3','voidg4','voidg5','voidg6','voidg7','voidg8','voidg9','voidg10','voidg11','voidg12'],
     httemp: ['httemp1','httemp2','httemp3','httemp4'],
-    hthtc: ['hthtc1','hthtc2','hthtc3','hthtc4','hthtc5','hthtc6','hthtc7','hthtc8','hthtc9','hthtc10','hthtc11'],
-    cntrlvar: ['cntrlvar']
+    hthtc: ['hthtc1','hthtc2','hthtc3','hthtc4','hthtc5','hthtc6','hthtc7','hthtc8','hthtc9','hthtc10'],
+    // cntrlvar: ['cntrlvar']
 };
 
 /**
@@ -79,17 +80,19 @@ export default function LiveFileChart({ incomingLine }) {
     });
 
     return (
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '24px' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
             {Object.keys(groups).map(group => (
                 <div
                     key={group}
                     style={{
-                        flex: '1 1 300px', // 최소 너비 300px, 가로로 늘어남
+                        flex: '1 1 400px', // 최소 너비 300px, 가로로 늘어남
                         padding: '16px',   // 주변 여백
                         boxSizing: 'border-box',
+                        backgroundColor: '#ececec',
+                        borderRadius: '8px',
                     }}
                 >
-                    <h3 style={{ textAlign: 'center' }}>{group.toUpperCase()}</h3>
+                    <h4 style={{ textAlign: 'center' }}>{group.toUpperCase()}</h4>
                     <ReactECharts
                         option={getOption(group)}
                         style={{ height: 200, width: '100%' }}

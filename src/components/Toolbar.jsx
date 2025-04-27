@@ -135,7 +135,9 @@ const FileUploader = () => {
         hiddenFileInput.current.click();
     };
 
-    const handleChange = (event) => {
+    const handleChange = async (event) => {
+
+        const bucket = 'v-smr'
         const file = event.target.files[0];
         console.log(file);
 
@@ -143,9 +145,15 @@ const FileUploader = () => {
         console.log(uploadPath);
 
         try {
-            uploadToMinio('v-smr', uploadPath, file)
+            const isSuccess = await uploadToMinio(bucket, uploadPath, file);
 
-            navigate('/task');
+            if (isSuccess) {
+                const args  = `${bucket},user1/project1/,${file.name}`;
+
+                navigate("/task", { state : args});
+            } else {
+                alert("업로드 실패!");
+            }
 
         } catch (error) {
             console.error('업로드 실패:', error);
@@ -154,7 +162,9 @@ const FileUploader = () => {
 
     return (
         <div>
-            <button onClick={handleClick}>
+            <button className="toolbar-button"
+                    onClick={handleClick}
+            >
                 👉 Simulation Start
             </button>
             <input

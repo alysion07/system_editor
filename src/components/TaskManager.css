@@ -1,8 +1,26 @@
 /* TaskManager.css */
 .task-manager {
-    padding: 20px;
-    max-width: 1200px;
     margin: 0 auto;
+    display: block;
+    align-items: center;
+    padding: 0 16px;
+    height: 60px;
+    background-color: #2c3e50;
+    color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+}
+.task-manager h2 {
+    padding: 20px 0;
+    margin: 0;
+    font-size: 18px;
+    font-weight: 500;
+}
+.task-manager-log-container,
+.task-manager-container{
+    padding: 30px 0;
+    color: black;
+
 }
 
 .task-controls {
@@ -44,24 +62,10 @@
 }
 
 .screen-logs, .plot-logs {
+    color: black;
     border: 1px solid #ddd;
     border-radius: 4px;
     padding: 15px;
-}
-
-.logs-list {
-    max-height: 400px;
-    overflow-y: auto;
-    font-family: monospace;
-}
-
-.log-entry {
-    padding: 5px;
-    border-bottom: 1px solid #eee;
-}
-
-.log-entry:last-child {
-    border-bottom: none;
 }
 
 @media (max-width: 768px) {

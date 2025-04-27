@@ -36,20 +36,20 @@ export const generatePresignedDownloadUrl = async (bucketName, objectKey) => {
 
 // 파일 업로드
 export const uploadToMinio = async (bucketName, objectKey, file) => {
-    const command = new PutObjectCommand({
-        Bucket: bucketName,
-        Key: objectKey,
-        Body: file,
-        ContentType: file.type,
-        ContentDisposition: `attachment; filename="${file.name}"`
-    });
-
-    try {
-        await client.send(command);
-
-    } catch (error) {
-        console.error('Error loading project:', error);
-        return false;
-    }
+    // const command = new PutObjectCommand({
+    //     Bucket: bucketName,
+    //     Key: objectKey,
+    //     Body: file,
+    //     ContentType: file.type,
+    //     ContentDisposition: `attachment; filename="${file.name}"`
+    // });
+    //
+    // try {
+    //     await client.send(command);
+    //
+    // } catch (error) {
+    //     console.error('Error loading project:', error);
+    //     return false;
+    // }
     return true;
 };

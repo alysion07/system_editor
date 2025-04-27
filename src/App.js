@@ -14,9 +14,9 @@ return (
         <div className="App">
             <main className="App-main">
                 <Routes>
-                    <Route path="/" element={<HomePage />} />
-                    <Route path="/nodeeditor" element={<NodeEditor />} />
+                    <Route path="/" element={<TaskManager />} />
                     <Route path="/task" element={<TaskManager />} />
+                    <Route path="/nodeeditor" element={<NodeEditor />} />
                 </Routes>
             </main>
         </div>

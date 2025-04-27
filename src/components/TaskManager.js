@@ -1,10 +1,15 @@
 // components/TaskManager.js
-import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
+import React, { useState, useEffect,useRef, forwardRef, useImperativeHandle } from 'react';
+import {useLocation} from "react-router-dom";
 import * as taskManagerService from '../services/taskManagerService';
 import LiveFileChart from './LiveFileChart';
 import {LiveLogViewer} from "./LogViewer";
 
+import './TaskManager.css'
+
 //v-smr,user1/project1,plotfl
+
+
 
 const TaskManager = forwardRef((props, ref) => {
     const [taskId, setTaskId] = useState('');
@@ -19,7 +24,22 @@ const TaskManager = forwardRef((props, ref) => {
     const [currentLine, setCurrentLine] = useState('');
     const [LogLine, setLogLine] = useState('');
 
+    const location = useLocation();
+    const uploadArgs  = location.state || '';
+    const isTaskStarted = useRef(false);
 
+    useEffect(() => {
+        if (uploadArgs !== '' ) {
+            console.log("User uploadArgs 받았습니다:", uploadArgs);
+            setArgs(uploadArgs);
+
+            if (!isTaskStarted.current) {
+                isTaskStarted.current = true;
+                console.log(" useEffect start",isTaskCompleted);
+                //startTask(uploadArgs)
+            }
+        }
+    }, [uploadArgs]);
     // 컴포넌트 마운트 시 서비스 초기화
     useEffect(() => {
         taskManagerService.initializeTaskManagerService();
@@ -38,6 +58,7 @@ const TaskManager = forwardRef((props, ref) => {
             }
         };
     }, []);
+
 
     // 태스크 시작
     const startTask = async (arg) => {
@@ -64,10 +85,12 @@ const TaskManager = forwardRef((props, ref) => {
                 },
                 onScreenComplete: () => {
                     console.log("Screen logging completed");
+                    isTaskStarted.current = false;
                 },
                 onPlotComplete: () => {
                     setPlotLogs(prev => [...prev, "Plot logging completed"]);
                     setIsTaskCompleted(true);
+                    isTaskStarted.current = false;
                 },
                 onError: (err, type) => {
                     console.error(`Error in ${type} logging:`, err);
@@ -120,10 +143,37 @@ const TaskManager = forwardRef((props, ref) => {
             setIsLoading(false);
         }
     };
+    const HandleStartTask = async () => {
+       if(args)
+           startTask(args)
+
+    }
 
     return (
         <div className="task-manager">
             <h2>Task Manager</h2>
+
+            {error && <div className="error-message">{error}</div>}
+
+            {taskId && (
+                <div className="task-info">
+                    <h3>Current Task ID: {taskId}</h3>
+                </div>
+            )}
+            {isTaskCompleted && (
+                <div className="task-completed">
+                    Task has been completed successfully!
+                </div>
+            )}
+            <div className={`task-manager-container ${taskId}`}>
+                <h4>Plot Chart</h4>
+                <LiveFileChart incomingLine={currentLine}/>
+            </div>
+            <div className ="screen-logs">
+                <h4> Screen Log</h4>
+                <LiveLogViewer incomingLine={LogLine}/>
+            </div>
+
 
             <div className="task-controls">
                 <div className="input-group">
@@ -150,7 +200,7 @@ const TaskManager = forwardRef((props, ref) => {
 
                 <div className="button-group">
                     <button
-                        onClick={startTask}
+                        onClick={HandleStartTask}
                         disabled={isLoading || !args.trim()}
                     >
                         Start Simulation
@@ -171,28 +221,6 @@ const TaskManager = forwardRef((props, ref) => {
                         </button>
                     </>
                 </div>
-            </div>
-
-            {error && <div className="error-message">{error}</div>}
-
-            {taskId && (
-                <div className="task-info">
-                    <h3>Current Task ID: {taskId}</h3>
-                </div>
-            )}
-            {isTaskCompleted && (
-                <div className="task-completed">
-                    Task has been completed successfully!
-                    {/*TODO */}
-                </div>
-            )}
-            <div>
-                <h4>Plot Chart</h4>
-                <LiveFileChart incomingLine={currentLine}/>
-            </div>
-            <div>
-                <h4> Screen Log</h4>
-                <LiveLogViewer incomingLine={LogLine}/>
             </div>
         </div>
     );
