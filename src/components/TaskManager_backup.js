@@ -5,7 +5,8 @@ import { Empty } from 'google-protobuf/google/protobuf/empty_pb';
 
 // Define your service endpoint
 const SERVICE_URL = 'http://129.254.222.219:8443';
-const client = new TaskManagerClient(SERVICE_URL);
+const SERVICE_URL_TEST = 'http://121.148.223.175:31838';
+const client = new TaskManagerClient(SERVICE_URL_TEST);
 console.log(client);
 
 const TaskManager_backup = () => {

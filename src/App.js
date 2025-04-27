@@ -1,19 +1,18 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, { useEffect, useRef, useState } from 'react';
 import './App.css';
 import TaskManager from "./components/TaskManager";
-import MinioHealthCheck from "./components/MinIOTester";
-import {MinioTextFileUploader} from "./components/MinIOTester2";
-import TaskManager_backup from "./components/TaskManager_backup";
+import  MinioManager from "./components/MinIOTester";
+
 
 function App() {
-  return (
+
+return (
     <div className="App">
       <main className="App-main">
-          <TaskManager_backup />
-          <MinioHealthCheck/>
-          <MinioTextFileUploader/>
+          <TaskManager />
+          <MinioManager/>
       </main>
+
     </div>
   );
 }

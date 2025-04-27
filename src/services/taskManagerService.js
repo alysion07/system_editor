@@ -9,9 +9,10 @@ const state = {
   pollingIntervals: new Map(),
   eol: ''
 };
-
+const SERVICE_URL_TEST = 'http://121.148.223.175:31838';
+const SERVICE_URL = 'http://129.254.222.219:8443'
 // 초기화 함수
-export const initializeTaskManagerService = (serviceUrl = 'http://129.254.222.219:8443') => {
+export const initializeTaskManagerService = (serviceUrl = SERVICE_URL_TEST) => {
   state.client = new TaskManagerClient(serviceUrl);
   return state.client;
 };
@@ -76,6 +77,23 @@ export const getPlotLog = (taskId) => {
   });
 };
 
+// EOL 데이터 가져오기
+export const getEOL = (taskId) => {
+  return new Promise((resolve, reject) => {
+    const client = getClient();
+    const taskIdObj = new TaskId();
+    taskIdObj.setTaskId(taskId);
+
+    client.get_eol(taskIdObj, {}, (err, response) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      resolve(response.getLogMsg());
+    });
+  });
+};
+
 // 연속 플롯 로그 수집
 export const getPlotLogsUntilEOL = async (taskId, onLog, onComplete) => {
   try {
@@ -92,7 +110,7 @@ export const getPlotLogsUntilEOL = async (taskId, onLog, onComplete) => {
         onLog(plotLog);
       }
       // 서버 부하 방지를 위한 짧은 대기
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise(resolve => setTimeout(resolve, 1000));
     }
   } catch (err) {
     throw err;
@@ -115,7 +133,7 @@ export const getScreenLogsUntilEOL = async (taskId, onLog, onComplete) => {
         onLog(screenLog);
       }
       // 서버 부하 방지를 위한 짧은 대기
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise(resolve => setTimeout(resolve, 1000));
     }
   } catch (err) {
     throw err;
@@ -123,22 +141,7 @@ export const getScreenLogsUntilEOL = async (taskId, onLog, onComplete) => {
 };
 
 
-// 플롯 로그 가져오기
-export const getEOL = (taskId) => {
-  return new Promise((resolve, reject) => {
-    const client = getClient();
-    const taskIdObj = new TaskId();
-    taskIdObj.setTaskId(taskId);
 
-    client.get_eol(taskIdObj, {}, (err, response) => {
-      if (err) {
-        reject(err);
-        return;
-      }
-      resolve(response.getLogMsg());
-    });
-  });
-};
 
 // 동시에 두 로그 수집 시작
 export const startContinuousLogging = (taskId, options = {}) => {
@@ -158,17 +161,28 @@ export const startContinuousLogging = (taskId, options = {}) => {
   // 화면 로그 수집 시작
   const screenLogging = async () => {
     try {
+      console.log('screenLogging');
+
       const eol = await getEOL(taskId);
+      console.log('Screen EOL:', eol);
+
+      console.log(' controllers.screen.abort',  controllers.screen.abort);
       while (!controllers.screen.abort) {
+        console.log('screenLog while start');
+
         const screenLog = await getScreenLog(taskId);
+        console.log('screenLog result', screenLog);
+
         if (screenLog === eol) {
           onScreenComplete();
+          console.log('getScreenLog break');
           break;
         }
+
         if (screenLog) {
           onScreenLog(screenLog);
         }
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise(resolve => setTimeout(resolve, 1000));
       }
     } catch (err) {
       if (!controllers.screen.abort) {
@@ -180,9 +194,13 @@ export const startContinuousLogging = (taskId, options = {}) => {
   // 플롯 로그 수집 시작
   const plotLogging = async () => {
     try {
+      console.log('plotLogging');
+
       const eol = await getEOL(taskId);
       while (!controllers.plot.abort) {
         const plotLog = await getPlotLog(taskId);
+        console.log('plotLog result', plotLog);
+
         if (plotLog === eol) {
           onPlotComplete();
           break;
@@ -190,7 +208,7 @@ export const startContinuousLogging = (taskId, options = {}) => {
         if (plotLog) {
           onPlotLog(plotLog);
         }
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise(resolve => setTimeout(resolve, 500));
       }
     } catch (err) {
       if (!controllers.plot.abort) {
@@ -200,21 +218,22 @@ export const startContinuousLogging = (taskId, options = {}) => {
   };
 
   // 비동기로 실행
+  console.log('startContinuousLogging');
   screenLogging();
   plotLogging();
 
   // 중단 함수 반환
   return () => {
-    controllers.screen.abort = true;
-    controllers.plot.abort = true;
+    // controllers.screen.abort = true;
+    // controllers.plot.abort = true;
   };
 };
 
 // 로그 폴링 시작
 export const startLogPolling = (taskId, options = {}) => {
   const {
-    screenLogInterval = 1000,
-    plotLogInterval = 300,
+    screenLogInterval = 2000,
+    plotLogInterval = 1000,
     onScreenLog = () => {},
     onPlotLog = () => {},
     onError = () => {}

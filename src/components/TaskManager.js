@@ -1,8 +1,12 @@
 // components/TaskManager.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import * as taskManagerService from '../services/taskManagerService';
+import LiveFileChart from './LiveFileChart';
+import {LiveLogViewer} from "./LogViewer";
 
-const TaskManager = () => {
+//v-smr,user1/project1,plotfl
+
+const TaskManager = forwardRef((props, ref) => {
     const [taskId, setTaskId] = useState('');
     const [screenLogs, setScreenLogs] = useState([]);
     const [plotLogs, setPlotLogs] = useState([]);
@@ -12,6 +16,8 @@ const TaskManager = () => {
     const [useStreaming, setUseStreaming] = useState(false);
     const [isTaskCompleted, setIsTaskCompleted] = useState(false);
     const [loggingControllers, setLoggingControllers] = useState(null);
+    const [currentLine, setCurrentLine] = useState('');
+    const [LogLine, setLogLine] = useState('');
 
 
     // 컴포넌트 마운트 시 서비스 초기화
@@ -31,30 +37,33 @@ const TaskManager = () => {
                 loggingControllers();
             }
         };
-    }, [loggingControllers]);
+    }, []);
 
     // 태스크 시작
-    const handleStartTask = async () => {
+    const startTask = async (arg) => {
         setIsLoading(true);
         setError('');
         setIsTaskCompleted(false);
 
         try {
-            const newTaskId = await taskManagerService.startTask(args);
+            const param = arg ? arg : args
+            const newTaskId = await taskManagerService.startTask(param);
             setTaskId(newTaskId);
-            setScreenLogs([`Task started with ID: ${newTaskId}`]);
+            setLogLine(`Task started with ID: ${newTaskId}`);
             setPlotLogs([]);
 
             // 연속 로깅 시작
             const stopLogging = taskManagerService.startContinuousLogging(newTaskId, {
                 onScreenLog: (log) => {
-                    setScreenLogs(prev => [...prev, log]);
+                    // setScreenLogs(prev => [...prev, log]);
+                    setLogLine(log);
                 },
                 onPlotLog: (log) => {
-                    setPlotLogs(prev => [...prev, log]);
+                    setCurrentLine(log);
+                    // setPlotLogs(prev => [...prev, log]);
                 },
                 onScreenComplete: () => {
-                    setScreenLogs(prev => [...prev, "Screen logging completed"]);
+                    console.log("Screen logging completed");
                 },
                 onPlotComplete: () => {
                     setPlotLogs(prev => [...prev, "Plot logging completed"]);
@@ -74,6 +83,10 @@ const TaskManager = () => {
             setIsLoading(false);
         }
     };
+
+    useImperativeHandle(ref, () => ({
+        handleStartTask: startTask  // 외부로 이 함수를 노출!
+    }))
 
     // 수동으로 로그 가져오기
     const handleGetScreenLog = async () => {
@@ -137,28 +150,26 @@ const TaskManager = () => {
 
                 <div className="button-group">
                     <button
-                        onClick={handleStartTask}
+                        onClick={startTask}
                         disabled={isLoading || !args.trim()}
                     >
-                        Start Task
+                        Start Simulation
                     </button>
+                    <>
+                        <button
+                            onClick={handleGetScreenLog}
+                            disabled={isLoading}
+                        >
+                            Get Screen Log Manually
+                        </button>
 
-
-                        <>
-                            <button
-                                onClick={handleGetScreenLog}
-                                disabled={isLoading}
-                            >
-                                Get Screen Log Manually
-                            </button>
-
-                            <button
-                                onClick={handleGetPlotLog}
-                                disabled={isLoading}
-                            >
-                                Get Plot Log Manually
-                            </button>
-                        </>
+                        <button
+                            onClick={handleGetPlotLog}
+                            disabled={isLoading}
+                        >
+                            Get Plot Log Manually
+                        </button>
+                    </>
                 </div>
             </div>
 
@@ -169,46 +180,22 @@ const TaskManager = () => {
                     <h3>Current Task ID: {taskId}</h3>
                 </div>
             )}
-
-            <div className="logs-container">
-                <div className="screen-logs">
-                    <h3>Screen Logs:</h3>
-                    {screenLogs.length === 0 ? (
-                        <p>No screen logs available</p>
-                    ) : (
-                        <div className="logs-list">
-                            {screenLogs.map((log, index) => (
-                                <div key={index} className="log-entry">
-                                    {log}
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </div>
-
-                <div className="plot-logs">
-                    <h3>Plot Logs:</h3>
-                    {plotLogs.length === 0 ? (
-                        <p>No plot logs available</p>
-                    ) : (
-                        <div className="logs-list">
-                            {plotLogs.map((log, index) => (
-                                <div key={index} className="log-entry">
-                                    {log}
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </div>
-            </div>
-
             {isTaskCompleted && (
                 <div className="task-completed">
                     Task has been completed successfully!
+                    {/*TODO */}
                 </div>
             )}
+            <div>
+                <h4>Plot Chart</h4>
+                <LiveFileChart incomingLine={currentLine}/>
+            </div>
+            <div>
+                <h4> Screen Log</h4>
+                <LiveLogViewer incomingLine={LogLine}/>
+            </div>
         </div>
     );
-};
+});
 
 export default TaskManager;

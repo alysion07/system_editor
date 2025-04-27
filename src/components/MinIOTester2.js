@@ -4,11 +4,13 @@ import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 
 const BUCKET_NAME = 'v-smr';       // 실제 버킷 이름으로 변경
 const PREFIX = 'user1/project1';              // 업로드 경로
+const TEST_URL = 'http://121.148.223.175:9010'
 
 // MinIO용 S3Client 인스턴스 (한 번만 생성해도 OK)
 const s3Client = new S3Client({
     region: 'us-east-1',                        // MinIO는 region 체크 안 하지만 필수값
-    endpoint: 'http://129.254.222.219:9010',
+    // endpoint: 'http://129.254.222.219:9010',
+    endpoint: TEST_URL,
     credentials: {
         accessKeyId: 'minio',
         secretAccessKey: 'minio123',
@@ -23,10 +25,6 @@ export const MinioTextFileUploader = () => {
         const file = event.target.files?.[0];
         if (!file) {
             setStatus('❌ 파일이 선택되지 않았습니다.');
-            return;
-        }
-        if (file.type !== 'text/plain') {
-            setStatus('❌ 텍스트 파일(.txt)만 업로드 가능합니다.');
             return;
         }
 
