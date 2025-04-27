@@ -148,7 +148,7 @@ const FileUploader = () => {
             const isSuccess = await uploadToMinio(bucket, uploadPath, file);
 
             if (isSuccess) {
-                const args  = `${bucket},user1/project1/,${file.name}`;
+                const args  = `${bucket},user1/project1,${file.name}`;
 
                 navigate("/task", { state : args});
             } else {

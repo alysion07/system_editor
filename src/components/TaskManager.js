@@ -4,8 +4,9 @@ import {useLocation} from "react-router-dom";
 import * as taskManagerService from '../services/taskManagerService';
 import LiveFileChart from './LiveFileChart';
 import {LiveLogViewer} from "./LogViewer";
-
+import MinioManager from "./MinIOTester";
 import './TaskManager.css'
+import { listBuckets, listFilesInBucket, generatePresignedDownloadUrl, uploadToMinio } from '../services/minioService';
 
 //v-smr,user1/project1,plotfl
 
@@ -27,6 +28,7 @@ const TaskManager = forwardRef((props, ref) => {
     const location = useLocation();
     const uploadArgs  = location.state || '';
     const isTaskStarted = useRef(false);
+    const [files, setFiles] = useState([]);
 
     useEffect(() => {
         if (uploadArgs !== '' ) {
@@ -36,7 +38,7 @@ const TaskManager = forwardRef((props, ref) => {
             if (!isTaskStarted.current) {
                 isTaskStarted.current = true;
                 console.log(" useEffect start",isTaskCompleted);
-                //startTask(uploadArgs)
+                startTask(uploadArgs)
             }
         }
     }, [uploadArgs]);
@@ -149,10 +151,28 @@ const TaskManager = forwardRef((props, ref) => {
 
     }
 
+    const fetchFiles = async (bucketName) => {
+        try {
+            const fileList = await listFilesInBucket('v-smr');
+            setFiles(fileList);
+        } catch (error) {
+            console.error('파일 가져오기 실패:', error);
+        }
+    };
+    const handleDownload = async (fileName) => {
+        try {
+            const url = await generatePresignedDownloadUrl('v-smr', fileName);
+            window.open(url, '_blank');
+        } catch (error) {
+            console.error('다운로드 URL 생성 실패:', error);
+        }
+    };
+
     return (
         <div className="task-manager">
-            <h2>Task Manager</h2>
-
+            <div className='task-manager-title'>
+                <h2>Task Manager</h2>
+            </div>
             {error && <div className="error-message">{error}</div>}
 
             {taskId && (
@@ -162,8 +182,10 @@ const TaskManager = forwardRef((props, ref) => {
             )}
             {isTaskCompleted && (
                 <div className="task-completed">
-                    Task has been completed successfully!
+                    <h2>Task has been completed successfully!</h2>
+                    <MinioManager isTaskComplete={useStreaming} />
                 </div>
+
             )}
             <div className={`task-manager-container ${taskId}`}>
                 <h4>Plot Chart</h4>

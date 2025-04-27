@@ -6,15 +6,17 @@
     padding: 0 16px;
     height: 60px;
     background-color: #2c3e50;
-    color: white;
+    color: black;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     z-index: 100;
 }
-.task-manager h2 {
+.task-manager-title h2 {
     padding: 20px 0;
     margin: 0;
     font-size: 18px;
     font-weight: 500;
+    color: white;
+
 }
 .task-manager-log-container,
 .task-manager-container{
@@ -25,6 +27,8 @@
 
 .task-controls {
     margin-bottom: 20px;
+    color: black;
+
 }
 
 .input-group {

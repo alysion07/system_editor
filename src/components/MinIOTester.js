@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { listBuckets, listFilesInBucket, generatePresignedDownloadUrl, uploadToMinio } from '../services/minioService';
 
-const MinioManager = () => {
+const MinioManager = ({isTaskComplete} ) => {
     const [status, setStatus] = useState('확인 중...');
     const [buckets, setBuckets] = useState([]);
     const [selectedBucket, setSelectedBucket] = useState(null);
@@ -13,16 +13,21 @@ const MinioManager = () => {
         const fetchBuckets = async () => {
             try {
                 const bucketList = await listBuckets();
-                setStatus('✅ MinIO 연결 성공!');
+                setStatus('✅');
                 setBuckets(bucketList);
             } catch (err) {
                 console.error(err);
-                setStatus(`❌ 연결 실패: ${err.name} - ${err.message}`);
+                setStatus(`❌: ${err.name} - ${err.message}`);
             }
         };
 
         fetchBuckets();
     }, []);
+    useEffect(() => {
+        console.log('task complite and reload file list')
+        fetchFiles('v-smr')
+
+    }, [isTaskComplete]);
 
     const fetchFiles = async (bucketName) => {
         try {
@@ -64,29 +69,26 @@ const MinioManager = () => {
 
     return (
         <div style={{ fontFamily: 'sans-serif', padding: 16 }}>
-            <h2>MinIO 연결 상태</h2>
-            <p>{status}</p>
-
-            {buckets.length > 0 ? (
-                <>
-                    <h3>버킷 목록 ({buckets.length})</h3>
-                    <ul>
-                        {buckets.map((bucket) => (
-                            <li key={bucket.Name}>
-                                <button onClick={() => fetchFiles(bucket.Name)} style={{ marginBottom: '4px' }}>
-                                    {bucket.Name}
-                                </button>
-                            </li>
-                        ))}
-                    </ul>
-                </>
-            ) : status.includes('성공') ? (
-                <p>버킷이 없습니다.</p>
-            ) : null}
-
+            {/*<p>{status}</p>*/}
+            {/*{buckets.length > 0 ? (*/}
+            {/*    <>*/}
+            {/*        <h3>버킷 목록 ({buckets.length})</h3>*/}
+            {/*        <ul>*/}
+            {/*            {buckets.map((bucket) => (*/}
+            {/*                <li key={bucket.Name}>*/}
+            {/*                    <button onClick={() => fetchFiles(bucket.Name)} style={{ marginBottom: '4px' }}>*/}
+            {/*                        {bucket.Name}*/}
+            {/*                    </button>*/}
+            {/*                </li>*/}
+            {/*            ))}*/}
+            {/*        </ul>*/}
+            {/*    </>*/}
+            {/*) : status.includes('성공') ? (*/}
+            {/*    <p>버킷이 없습니다.</p>*/}
+            {/*) : null}*/}
             {selectedBucket && (
-                <div style={{ marginTop: 32 }}>
-                    <h3>버킷 "{selectedBucket}"의 파일 리스트</h3>
+                <div style={{ marginTop: 10 }}>
+                    <h3> {status} 버킷 "{selectedBucket}"의 파일 리스트</h3>
                     {files.length > 0 ? (
                         <ul>
                             {files.map((file, index) => (
@@ -101,21 +103,6 @@ const MinioManager = () => {
                     ) : (
                         <p>파일이 없습니다.</p>
                     )}
-
-                    <div style={{ marginTop: 20 }}>
-                        <h4>파일 업로드</h4>
-                        <input type="file" onChange={handleFileChange} />
-                        <input
-                            type="text"
-                            placeholder="업로드할 경로/파일명"
-                            value={uploadPath}
-                            onChange={(e) => setUploadPath(e.target.value)}
-                            style={{ marginLeft: '10px' }}
-                        />
-                        <button onClick={handleUpload} style={{ marginLeft: '10px' }}>
-                            업로드
-                        </button>
-                    </div>
                 </div>
             )}
         </div>
