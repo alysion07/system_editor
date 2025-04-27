@@ -10,7 +10,6 @@ import {
 } from '@dnd-kit/core';
 
 import { restrictToWindowEdges } from '@dnd-kit/modifiers';
-import { useNavigate }  from 'react-router-dom';
 
 // Components
 import ComponentPalette from './components/ComponentPalette';
@@ -28,6 +27,7 @@ import './styles/App.css';
 import { generateId } from './utils/helpers';
 import { getInitialState, reducer } from './reducers/editorReducer';
 import { generateMarsInputFile, saveInputFile } from './utils/fileGenerator';
+import {uploadToMinio} from "./services/minioService";
 
 
 function NodeEditor() {
@@ -40,7 +40,6 @@ function NodeEditor() {
     const [connectionInProgress, setConnectionInProgress] = useState(null);
     const [paletteWidth, setPaletteWidth] = useState(160); // 초기값 설정
     const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-    const navigate = useNavigate();
 
     // References
     const canvasRef = useRef(null);
@@ -329,15 +328,6 @@ function NodeEditor() {
         //
         // // Save the generated content to a file
         // saveInputFile(inputFileContent, `${state.present.projectName.replace(/\s+/g, '_')}_input.txt`);
-
-        // TODO: upload and task start
-
-            const isUploaded = true;
-
-            if (isUploaded) {
-                // 로그인 기능은 아직 연결하지 않고, 바로 MinioManager 페이지로 이동
-                navigate('/task');
-            }
 
 
     };

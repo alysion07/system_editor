@@ -9,6 +9,7 @@ const client = new S3Client({
         accessKeyId: 'minio',
         secretAccessKey: 'minio123',
     },
+    requestChecksumCalculation: "WHEN_REQUIRED",
     forcePathStyle: true,
 });
 
@@ -39,8 +40,16 @@ export const uploadToMinio = async (bucketName, objectKey, file) => {
         Bucket: bucketName,
         Key: objectKey,
         Body: file,
+        ContentType: file.type,
+        ContentDisposition: `attachment; filename="${file.name}"`
     });
-    await client.send(command);
-    console.log('✅ 업로드 성공:', objectKey);
+
+    try {
+        await client.send(command);
+
+    } catch (error) {
+        console.error('Error loading project:', error);
+        return false;
+    }
     return true;
 };

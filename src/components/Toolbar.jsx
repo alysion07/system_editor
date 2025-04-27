@@ -1,6 +1,8 @@
 // File: src/components/Toolbar.js
-import React from 'react';
+import React, {useRef} from 'react';
 import '../styles/Toolbar.css';
+import {useNavigate} from "react-router-dom";
+import {uploadToMinio} from "../services/minioService";
 
 const Toolbar = ({
                      onMousePosition,
@@ -30,7 +32,6 @@ const Toolbar = ({
             setIsEditing(false);
         }
     };
-
     React.useEffect(() => {
         if (isEditing && inputRef.current) {
             inputRef.current.focus();
@@ -102,14 +103,15 @@ const Toolbar = ({
                     📂 Load
                 </button>
 
-                <button
-                    className="toolbar-button"
-                    onClick={onGenerateInput}
-                    title="Generate Input File"
-                >
-                    📝 Generate Input
-                </button>
+                {/*<button*/}
+                {/*    className="toolbar-button"*/}
+                {/*    // onClick={onGenerateInput}*/}
+                {/*    title="Generate Input File"*/}
+                {/*>*/}
+                {/*    📝 Generate Input*/}
+                {/*</button>*/}
 
+                <FileUploader/>
                 <input
                     ref={fileInputRef}
                     type="file"
@@ -123,3 +125,44 @@ const Toolbar = ({
 };
 
 export default Toolbar;
+
+
+const FileUploader = () => {
+    const hiddenFileInput = useRef(null);
+    const navigate = useNavigate();
+
+    const handleClick = () => {
+        hiddenFileInput.current.click();
+    };
+
+    const handleChange = (event) => {
+        const file = event.target.files[0];
+        console.log(file);
+
+        const uploadPath = 'user1/project1/' + file.name;
+        console.log(uploadPath);
+
+        try {
+            uploadToMinio('v-smr', uploadPath, file)
+
+            navigate('/task');
+
+        } catch (error) {
+            console.error('업로드 실패:', error);
+        }
+    };
+
+    return (
+        <div>
+            <button onClick={handleClick}>
+                👉 Simulation Start
+            </button>
+            <input
+                type="file"
+                ref={hiddenFileInput}
+                onChange={handleChange}
+                style={{ display: 'none' }}
+            />
+        </div>
+    );
+};
