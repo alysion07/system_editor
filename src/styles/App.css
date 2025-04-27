@@ -43,3 +43,11 @@ body {
     overflow-y: auto;
     z-index: 10;
 }
+.connections-container {
+    width: 100%;
+    height: 100%;
+    position: absolute; /* 다른 레이어 위에 떠있게 */
+    top: 0;
+    left: 0;
+    pointer-events: none; /* 필요 시 클릭 막기 */
+}

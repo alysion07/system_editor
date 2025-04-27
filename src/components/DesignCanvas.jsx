@@ -2,7 +2,6 @@
 import React, { useRef, useEffect, forwardRef } from 'react';
 import { useDroppable } from '@dnd-kit/core';
 import Connection from './Connection';
-import ConnectionRenderer from './ConnectionRenderer';
 import Node from './Node';
 import '../styles/DesignCanvas.css';
 import { componentTypes } from './ComponentsType.jsx';
@@ -90,28 +89,28 @@ const DesignCanvas = forwardRef(({
             }
         };
 
-        // 외부에서 정의된 getCurrentScale 함수 사용
         const handleWheel = (e) => {
             e.preventDefault();
 
-            const contentContainer = canvas.querySelector('.canvas-content');
+            const contentContainer = canvasRef.current?.querySelector('.canvas-content');
             if (!contentContainer) return;
 
-            // Get current scale
-            const  currentScale= transform.scale;
+            // 여기서 transform을 직접 쓰지 않고
+            setTransform(prev => {
+                const currentScale = prev.scale;
+                const delta = e.deltaY > 0 ? -0.05 : 0.05;
+                const newScale = Math.max(0.05, Math.min(4, currentScale + delta));
 
-            // Calculate new scale
-            const delta = e.deltaY > 0 ? -0.05 : 0.05;
-            const newScale = Math.max(0.1, Math.min(2, currentScale + delta));
+                const translateMatch = contentContainer.style.transform.match(/translate\(([^,]+)px, ([^)]+)px\)/);
+                const translateX = translateMatch ? parseFloat(translateMatch[1]) : 0;
+                const translateY = translateMatch ? parseFloat(translateMatch[2]) : 0;
 
-            // Update transform
-            const translateMatch = contentContainer.style.transform.match(/translate\(([^,]+)px, ([^)]+)px\)/);
-            const translateX = translateMatch ? parseFloat(translateMatch[1]) : 0;
-            const translateY = translateMatch ? parseFloat(translateMatch[2]) : 0;
+                contentContainer.style.transform = `translate(${translateX}px, ${translateY}px) scale(${newScale})`;
 
-            contentContainer.style.transform = `translate(${translateX}px, ${translateY}px) scale(${newScale})`;
-            setTransform({...transform, scale: newScale}); // 상태 업데이트
-            updateConnection();
+                updateConnection(); // 연결 업데이트
+
+                return { ...prev, scale: newScale };
+            });
         };
 
         canvas.addEventListener('mousedown', handleMouseDown);
@@ -315,15 +314,16 @@ const DesignCanvas = forwardRef(({
 
                         if (!sourceNode || !targetNode) return null;
 
+                        const startPos = getPortPosition(sourceNode, connection.sourcePortId, false);
+                        const endPos = getPortPosition(targetNode, connection.targetPortId, true);
+
                         return (
-                            <ConnectionRenderer
+                            <Connection
                                 key={connection.id}
                                 connection={connection}
-                                sourceNode={sourceNode}
-                                targetNode={targetNode}
-                                getPortPosition={getPortPosition}
-                                onDeleteConnection={onDeleteConnection}
-                                currentScale={transform.scale}
+                                startPos={startPos}
+                                endPos={endPos}
+                                onDelete={() => onDeleteConnection(connection.id)}
                             />
                         );
                     })}
