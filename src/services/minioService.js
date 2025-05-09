@@ -4,7 +4,7 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 // MinIO 클라이언트 생성
 const client = new S3Client({
     region: 'us-east-1',
-    endpoint: 'http://121.148.223.175:9010',
+    endpoint: 'http://129.254.222.219:9010',
     credentials: {
         accessKeyId: 'minio',
         secretAccessKey: 'minio123',

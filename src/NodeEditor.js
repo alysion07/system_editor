@@ -57,24 +57,24 @@ function NodeEditor() {
             },
         }),
     );
-    // // 컴포넌트가 마운트될 때 이벤트 리스너 추가
-    // useEffect(() => {
-    //     // 마우스 이벤트 핸들러 함수
-    //     function handleGlobalMouseMove(event) {
-    //         setMousePosition({
-    //             x: event.clientX,
-    //             y: event.clientY
-    //         });
-    //     }
-    //
-    //     // 문서에 이벤트 리스너 추가
-    //     document.addEventListener('mousemove', handleGlobalMouseMove);
-    //
-    //     // 컴포넌트가 언마운트될 때 정리(cleanup) 함수
-    //     return () => {
-    //         document.removeEventListener('mousemove', handleGlobalMouseMove);
-    //     };
-    // }, []); // 빈 배열은 이 효과가 마운트/언마운트 시에만 실행됨을 의미
+    // 컴포넌트가 마운트될 때 이벤트 리스너 추가
+    useEffect(() => {
+        // 마우스 이벤트 핸들러 함수
+        function handleGlobalMouseMove(event) {
+            setMousePosition({
+                x: event.clientX,
+                y: event.clientY
+            });
+        }
+
+        // 문서에 이벤트 리스너 추가
+        document.addEventListener('mousemove', handleGlobalMouseMove);
+
+        // 컴포넌트가 언마운트될 때 정리(cleanup) 함수
+        return () => {
+            document.removeEventListener('mousemove', handleGlobalMouseMove);
+        };
+    }, []); // 빈 배열은 이 효과가 마운트/언마운트 시에만 실행됨을 의미
 
     /**
      * 드래그 작업이 시작될 때 호출되는 핸들러 함수
@@ -134,6 +134,7 @@ function NodeEditor() {
 
             // 라벨을 사용하여 이름 생성 (예: SJ -> SJ001)
             const nodeName = `${componentLabel}${formattedNumber}`;
+
 
             // 마우스 포인터 위치를 캔버스 내 좌표로 변환
             let canvasX = mousePosition.x - paletteWidth;

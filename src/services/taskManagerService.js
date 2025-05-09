@@ -12,7 +12,7 @@ const state = {
 const SERVICE_URL_TEST = 'http://121.148.223.175:31838';
 const SERVICE_URL = 'http://129.254.222.219:8443'
 // 초기화 함수
-export const initializeTaskManagerService = (serviceUrl = SERVICE_URL_TEST) => {
+export const initializeTaskManagerService = (serviceUrl = SERVICE_URL) => {
   state.client = new TaskManagerClient(serviceUrl);
   return state.client;
 };
@@ -110,7 +110,7 @@ export const getPlotLogsUntilEOL = async (taskId, onLog, onComplete) => {
         onLog(plotLog);
       }
       // 서버 부하 방지를 위한 짧은 대기
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 17));
     }
   } catch (err) {
     throw err;
@@ -133,7 +133,7 @@ export const getScreenLogsUntilEOL = async (taskId, onLog, onComplete) => {
         onLog(screenLog);
       }
       // 서버 부하 방지를 위한 짧은 대기
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 17));
     }
   } catch (err) {
     throw err;
@@ -182,7 +182,7 @@ export const startContinuousLogging = (taskId, options = {}) => {
         if (screenLog) {
           onScreenLog(screenLog);
         }
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise(resolve => setTimeout(resolve, 17));
       }
     } catch (err) {
       if (!controllers.screen.abort) {
@@ -208,7 +208,7 @@ export const startContinuousLogging = (taskId, options = {}) => {
         if (plotLog) {
           onPlotLog(plotLog);
         }
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise(resolve => setTimeout(resolve, 17));
       }
     } catch (err) {
       if (!controllers.plot.abort) {
