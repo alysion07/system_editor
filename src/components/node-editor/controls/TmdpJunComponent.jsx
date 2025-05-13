@@ -1,5 +1,5 @@
 import React from 'react';
-import { componentTypes } from '../node-editor/ComponentsType.jsx';
+import { componentTypes } from '../ComponentsType.jsx';
 
 /**
  * TMDPJUN Component Type Definition

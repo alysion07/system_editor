@@ -1,0 +1,60 @@
+
+/* styles/Toolbar.css */
+.editor-toolbar {
+    display: flex;
+    align-items: center;
+    height: 36px;
+    width: auto;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #ddd;
+    padding: 0 10px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 10;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.toolbar-group {
+    display: flex;
+    margin-right: 5px;
+}
+
+.toolbar-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: none;
+    background-color: transparent;
+    border-radius: 4px;
+    margin: 0 2px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.toolbar-button:hover {
+    background-color: #ececec;
+}
+
+.toolbar-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.toolbar-divider {
+    width: 1px;
+    height: 20px;
+    background-color: #ddd;
+    margin: 0 8px;
+}
+
+/* Font Awesome 사용하지 않는 경우 대체 텍스트 스타일 */
+.toolbar-button i {
+    font-size: 14px;
+}
+.toolbar-right {
+    margin-left: auto; /* 이 속성이 오른쪽으로 밀어냄 */
+}

@@ -2,9 +2,8 @@ import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 
 import TaskManager from "./components/TaskManager";
 import HomePage from "./Homepage";
-import NodeEditor from "./NodeEditor";
+import NodeEditor from "./components/node-editor/NodeEditor";
 function App() {
-
 
 
 return (

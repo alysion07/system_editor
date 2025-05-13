@@ -1,6 +1,6 @@
 // File: src/reducers/editorReducer.js
 
-import { componentTypes, componentCategories } from '../components/ComponentsType.jsx';
+import { componentTypes, componentCategories } from '../components/node-editor/ComponentsType.jsx';
 import { updateNodesWithConnectionData } from '../utils/connectionHelper.jsx';
 
 // Create initial state for editor

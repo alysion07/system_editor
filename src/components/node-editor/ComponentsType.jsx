@@ -1,4 +1,4 @@
-import metaTMDPJUN  from "./control/TmdpJunComponent.jsx";
+import metaTMDPJUN  from "./controls/TmdpJunComponent.jsx";
 
 export const componentTypes = {
     SNGLVOL: {
