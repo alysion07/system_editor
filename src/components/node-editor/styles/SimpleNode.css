@@ -1,4 +1,5 @@
-.simple-node-container{
+
+.simple-node-body{
     border-radius: 3px;
     border: 1px solid #666666;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
@@ -10,14 +11,8 @@
     padding: 4px;
     width: 50px;
     height: 50px;
-
-}
-.simple-node-body{
     flex: 1 1 auto;
     overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
 }
 .simple-node-body img {
     display: block;
