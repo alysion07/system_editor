@@ -1,36 +1,37 @@
 // Toolbar.jsx
 import {useRef, useState, useEffect, useCallback} from 'react';
+import {useNavigate} from "react-router-dom";
+import {uploadToMinio} from "../../services/minioService";
+
 import './styles/Toolbar.css';
 
-const FileUploader = () => {
+const FileUploader = ( {projectTitle}) => {
 
     const fileInputRef  = useRef(null);
-    // const navigate = useNavigate();
+    const navigate = useNavigate();
 
     const handleClick = () => {
-        fileInputRef .current.click();
+        fileInputRef.current.click();
     };
 
     const handleChange = async (event) => {
 
         const bucket = 'v-smr'
         const file = event.target.files[0];
+        const userName = 'yjcho'
+        const project = projectTitle
         console.log(file);
 
-        const uploadPath = 'user1/project1/' + file.name;
+        const uploadPath = userName + '/' + project + '/' + file.name;
         console.log(uploadPath);
 
         try {
-            //TODO
-            // const isSuccess = await uploadToMinio(bucket, uploadPath, file);
-
-            const isSuccess = false;
+            const isSuccess = await uploadToMinio(bucket, uploadPath, file);
 
             if (isSuccess) {
-                const args  = `${bucket},user1/project1,${file.name}`;
+                const args  = `${bucket},${userName}/${project},${file.name}`;
 
-                //TODO
-                // navigate("/task", { state : args});
+                navigate("/task", { state : args});
             } else {
                 alert("업로드 실패!");
             }
@@ -80,7 +81,8 @@ const Toolbar = ({
     const handleProjectNameClick = () => {
         setIsEditing(true);
     };
-
+    const handleProjectNameChanged = (e) => {
+    };
     const handleProjectNameBlur = () => {
         setIsEditing(false);
     };
@@ -152,7 +154,7 @@ const Toolbar = ({
             </div>
             <div className="toolbar-divider"></div>
 
-            <FileUploader/>
+            <FileUploader projectTitle={projectName} />
 
         </div>
     );

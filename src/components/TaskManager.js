@@ -174,16 +174,12 @@ const TaskManager = forwardRef((props, ref) => {
                 <h2>Task Manager</h2>
             </div>
             {error && <div className="error-message">{error}</div>}
-
-            {taskId && (
-                <div className="task-info">
-                    <h3>Current Task ID: {taskId}</h3>
-                </div>
-            )}
             {isTaskCompleted && (
                 <div className="task-completed">
-                    <h2>Task has been completed successfully!</h2>
-                    <MinioManager isTaskComplete={useStreaming} />
+                    <h4>Task has been completed successfully!</h4>
+                    <MinioManager isTaskComplete={useStreaming}
+                                   projectFolderPath={uploadArgs}
+                    />
                 </div>
 
             )}
@@ -208,41 +204,41 @@ const TaskManager = forwardRef((props, ref) => {
                         placeholder="arg1, arg2, arg3"
                     />
                 </div>
+                
+                {/*<div className="mode-selector">*/}
+                {/*    <label>*/}
+                {/*        <input*/}
+                {/*            type="checkbox"*/}
+                {/*            checked={useStreaming}*/}
+                {/*            onChange={(e) => setUseStreaming(e.target.checked)}*/}
+                {/*        />*/}
+                {/*        Use Streaming Mode*/}
+                {/*    </label>*/}
+                {/*</div>*/}
 
-                <div className="mode-selector">
-                    <label>
-                        <input
-                            type="checkbox"
-                            checked={useStreaming}
-                            onChange={(e) => setUseStreaming(e.target.checked)}
-                        />
-                        Use Streaming Mode
-                    </label>
-                </div>
+                {/*<div className="button-group">*/}
+                {/*    <button*/}
+                {/*        onClick={HandleStartTask}*/}
+                {/*        disabled={isLoading || !args.trim()}*/}
+                {/*    >*/}
+                {/*        Start Simulation*/}
+                {/*    </button>*/}
+                {/*    <>*/}
+                {/*        <button*/}
+                {/*            onClick={handleGetScreenLog}*/}
+                {/*            disabled={isLoading}*/}
+                {/*        >*/}
+                {/*            Get Screen Log Manually*/}
+                {/*        </button>*/}
 
-                <div className="button-group">
-                    <button
-                        onClick={HandleStartTask}
-                        disabled={isLoading || !args.trim()}
-                    >
-                        Start Simulation
-                    </button>
-                    <>
-                        <button
-                            onClick={handleGetScreenLog}
-                            disabled={isLoading}
-                        >
-                            Get Screen Log Manually
-                        </button>
-
-                        <button
-                            onClick={handleGetPlotLog}
-                            disabled={isLoading}
-                        >
-                            Get Plot Log Manually
-                        </button>
-                    </>
-                </div>
+                {/*        <button*/}
+                {/*            onClick={handleGetPlotLog}*/}
+                {/*            disabled={isLoading}*/}
+                {/*        >*/}
+                {/*            Get Plot Log Manually*/}
+                {/*        </button>*/}
+                {/*    </>*/}
+                {/*</div>*/}
             </div>
         </div>
     );

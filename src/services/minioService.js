@@ -27,6 +27,21 @@ export const listFilesInBucket = async (bucketName) => {
     return response.Contents ? response.Contents.map(item => item.Key) : [];
 };
 
+// 폴더(프리픽스) 하위 파일 리스트 가져오기
+export const listFilesInFolder = async (bucketName, folderPath) => {
+    const command = new ListObjectsV2Command({
+        Bucket: bucketName,
+        Prefix: folderPath, // 예: 'user/project/'
+        Delimiter: '',      // 하위 폴더까지 모두 조회하려면 빈 문자열
+    });
+    const response = await client.send(command);
+    return response.Contents
+        ? response.Contents
+            .filter(item => item.Key !== folderPath) // 폴더 자신 제외
+            .map(item => item.Key)
+        : [];
+};
+
 // Presigned 다운로드 URL 생성
 export const generatePresignedDownloadUrl = async (bucketName, objectKey) => {
     const command = new GetObjectCommand({ Bucket: bucketName, Key: objectKey });

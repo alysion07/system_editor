@@ -43,6 +43,7 @@ const NodeEditor = () => {
     const [reactFlowInstance, setReactFlowInstance] = useState(null);
     const [selectedNode, setSelectedNode] = useState(null);
     const [isSimplified, setIsSimplified] = useState(false);
+    const [projectName, setProjectName] = useState('noname project');
 
     const fileInputRef = React.useRef(null);
 
@@ -291,7 +292,7 @@ const NodeEditor = () => {
 
         // componentType에 따라 다른 컴포넌트 렌더링
         switch(componentType) {
-            case "HEATSTR":
+            case "HTSTR":
                 return (
                     <HeatStructure
                         selectedNode={selectedNode}
@@ -352,6 +353,10 @@ const NodeEditor = () => {
 
         if (!file) return;
 
+        // 파일명에서 확장자 제거 후 프로젝트명으로 설정
+        const fileName = file.name.replace(/\.[^/.]+$/, "");
+        setProjectName(fileName);
+
         fileReader.onload = (e) => {
             try {
                 const flowData = JSON.parse(e.target.result);
@@ -376,7 +381,7 @@ const NodeEditor = () => {
 
         fileReader.readAsText(file);
         event.target.value = null;
-    }, [store, reactFlowInstance]);
+    }, [store, reactFlowInstance, setProjectName]);
 
     const handleSimplify = useCallback(() => {
         console.log('handleSimplify');
@@ -419,7 +424,8 @@ const NodeEditor = () => {
                             onImport={handleImport}
                             onExport={handleExport}
                             onGeneralSetting={onGenSettings}
-                            projectName={ 'default project' }
+                            projectName={projectName}
+                            onProjectNameChange={setProjectName}
                             onSimplify={handleSimplify}
                             isSimplified={isSimplified}
                         />

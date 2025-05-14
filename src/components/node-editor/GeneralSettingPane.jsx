@@ -208,14 +208,14 @@ export default function GeneralSettingPane() {
                     </>
                 )}
 
-                <button type="submit" className="button-generate">Generate Input File</button>
+                {/*<button type="submit" className="button-generate">Generate Input File</button>*/}
 
-                {generatedText && (
-                    <div className="form-group">
-                        <h2 className="section-heading">Generated File</h2>
-                        <pre className="output">{generatedText}</pre>
-                    </div>
-                )}
+                {/*{generatedText && (*/}
+                {/*    <div className="form-group">*/}
+                {/*        <h2 className="section-heading">Generated File</h2>*/}
+                {/*        <pre className="output">{generatedText}</pre>*/}
+                {/*    </div>*/}
+                {/*)}*/}
             </div>
         </form>
     );

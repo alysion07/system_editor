@@ -5,24 +5,31 @@ import ReactECharts from 'echarts-for-react';
 // 파일 헤더와 매칭되는 센서 키 목록
 const headers = [
     'time',
+    'rktpow1','cntrlvar1','cntrlvar2',
+    'p1','p2','p3','p4','p5','p6','p7','p8',
+    'tempf1','tempf2','tempf3','tempf4','tempf5','tempf6','tempf7',
     'mflowj1','mflowj2','mflowj3',
-    'tempf1','tempf2','tempf3','tempf4','tempf5','tempf6','tempf7','tempf8','tempf9','tempf10','tempf11','tempf12','tempf13','tempf14',
-    'p1','p2',
-    'voidg1','voidg2','voidg3','voidg4','voidg5','voidg6','voidg7','voidg8','voidg9','voidg10','voidg11','voidg12',
-    'httemp1','httemp2','httemp3','httemp4',
-    'hthtc1','hthtc2','hthtc3','hthtc4','hthtc5','hthtc6','hthtc7','hthtc8','hthtc9','hthtc10',
-    // 'cntrlvar'
+    'mflowj4','mflowj5',
+    'mflowj6','mflowj7',
+    'mflowj8',"cntrlvar3",'mflowj9','mflowj10',
+    'cntrlvar4','cntrlvar5',
+    'cntrlvar6',
+    'tempf8','tempf8','tempg1',
+    'mflowj8','mflowj9',
 ];
 
 const groups = {
+    HTRNR: ['rktpow1','cntrlvar1','cntrlvar2',],
+    p: ['p1','p2','p3','p4','p5','p6','p7','p8'],
+    tempf0: [ 'tempf1','tempf2','tempf3','tempf4','tempf5','tempf6','tempf7'],
     mflowj: ['mflowj1','mflowj2','mflowj3'],
-    tempf0: ['tempf1','tempf2'],
-    tempf: ['tempf3','tempf4','tempf5','tempf6','tempf7','tempf8','tempf9','tempf10','tempf11','tempf12','tempf13','tempf14'],
-    p: ['p1','p2'],
-    voidg: ['voidg1','voidg2','voidg3','voidg4','voidg5','voidg6','voidg7','voidg8','voidg9','voidg10','voidg11','voidg12'],
-    httemp: ['httemp1','httemp2','httemp3','httemp4'],
-    hthtc: ['hthtc1','hthtc2','hthtc3','hthtc4','hthtc5','hthtc6','hthtc7','hthtc8','hthtc9','hthtc10'],
-    // cntrlvar: ['cntrlvar']
+    mflowj1: ['mflowj4','mflowj5'],
+    mflowj2: ['mflowj6','mflowj7'],
+    mflowj3: ['mflowj8',"cntrlvar3",'mflowj9','mflowj10'],
+    cntrlvar:['cntrlvar4','cntrlvar5'],
+    cntrlvar1: ['cntrlvar6'],
+    tempf1: ['tempf8','tempf8','tempg1'],
+    mflowj4:['mflowj8','mflowj9'],
 };
 
 /**
