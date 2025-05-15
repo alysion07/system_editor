@@ -115,6 +115,25 @@ const useFlowStore = create((set, get) => ({
         set({ dragStartNodes: null });
     },
 
+    updateNodeProp: (nodeId, key, value) => {
+        const { present, set } = get();
+        const updatedNodes = present.nodes.map(node =>
+            node.id === nodeId
+                ? {
+                    ...node,
+                    data: {
+                        ...node.data,
+                        componentProp: {
+                            ...node.data.componentProp,
+                            [key]: value,
+                        },
+                    },
+                }
+                : node
+        );
+        set(updatedNodes, present.edges);
+    },
+
     // 다이어그램 Import 함수 추가
     importFlow: (flowData) => {
         const { past, present } = get();

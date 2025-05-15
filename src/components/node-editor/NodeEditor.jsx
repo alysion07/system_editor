@@ -42,7 +42,7 @@ const NodeEditor = () => {
     const reactFlowWrapper = useRef(null);
     const [reactFlowInstance, setReactFlowInstance] = useState(null);
     const [selectedNode, setSelectedNode] = useState(null);
-    const [isSimplified, setIsSimplified] = useState(false);
+    const [isSimplified, setIsSimplified] = useState(true);
     const [projectName, setProjectName] = useState('noname project');
 
     const fileInputRef = React.useRef(null);
@@ -318,7 +318,8 @@ const NodeEditor = () => {
                     <NodeInspector
                         selectedNode={selectedNode}
                         componentTypes={componentTypes}
-                        onPropertyChange={() => {console.log( 'todo onPropertyChange ')}}
+                        onPropertyChange={handlePropChange}
+
                     />
                 );
                 case "GENSET":
@@ -397,6 +398,10 @@ const NodeEditor = () => {
         console.log('handleSimplify');
         setIsSimplified(prev => !prev);
     }, []);
+
+    const handlePropChange = (nodeId, key, value) => {
+        store.updateNodeProp(nodeId, key, value);
+    };
 
 
     return (

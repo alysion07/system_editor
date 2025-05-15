@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect,  useRef} from 'react';
 import MeshVisualizer from './controls/MeshVisualizer.jsx'; // 특수 컴포넌트 임포트
 import TableEditor from './controls/TableEditor.jsx';
 import './styles/NodeInspector.css'
@@ -11,17 +11,17 @@ import './styles/NodeInspector.css'
  */
 const NodeInspector = ({ selectedNode, componentTypes, onPropertyChange }) => {
     // Local state to manage form values
-    const [formValues, setFormValues] = useState({});
+    const [formValues, setFormValues] = useState(selectedNode.data.componentProp || {});
     // Track active tab
     const [activeTab, setActiveTab] = useState(null);
     // Track validation errors
     const [errors, setErrors] = useState({});
-
+    const inspectorRef = useRef(null);
     // 선택된 노드가 변경될 때 폼 상태 초기화
     useEffect(() => {
         if (selectedNode) {
             // 노드 데이터로 폼 초기화
-            setFormValues(selectedNode.data?.value || {});
+            setFormValues(selectedNode.data?.componentProp || {});
             
             // 기본 활성 탭 설정
             const componentType = selectedNode.data?.componentType;
@@ -66,24 +66,43 @@ const NodeInspector = ({ selectedNode, componentTypes, onPropertyChange }) => {
      * @param {string} fieldId - ID of the field being changed
      * @param {any} value - New value for the field
      */
-    const handleFieldChange = (fieldId, value) => {
-        // Update local form state
-        setFormValues(prev => {
-            const newValues = { ...prev, [fieldId]: value };
+    // const handleFieldChange = (fieldId, value) => {
+    //     // Update local form state
+    //     setFormValues(prev => {
+    //         const newValues = { ...prev, [fieldId]: value };
+    //
+    //         // Process automatic calculations based on related fields
+    //         const updatedValues = processRelatedFields(fieldId, newValues, componentDef);
+    //
+    //         // Validate the updated field
+    //         validateField(fieldId, updatedValues[fieldId], updatedValues);
+    //
+    //         return updatedValues;
+    //     });
+    //
+    //     //TODO 발생 오류 확인 필요 'Uncaught TypeError: onPropertyChange is not a function'
+    //     // 상태 업데이트 후 부모 컴포넌트에 알림 (React 이벤트 핸들러 내에서 안전하게 호출)
+    //     // 이 시점에서 formValues는 아직 업데이트되지 않은 상태이므로 직접 값을 전
+    //     onPropertyChange(selectedNode.id, fieldId, value);
+    // };
 
-            // Process automatic calculations based on related fields
-            const updatedValues = processRelatedFields(fieldId, newValues, componentDef);
+        // 입력값 변경 핸들러
+    const handleFieldChange = (key, value) => {
+            setFormValues(prev => ({ ...prev, [key]: value }));
+        };
 
-            // Validate the updated field
-            validateField(fieldId, updatedValues[fieldId], updatedValues);
-
-            return updatedValues;
-        });
-
-        //TODO 발생 오류 확인 필요 'Uncaught TypeError: onPropertyChange is not a function'
-        // 상태 업데이트 후 부모 컴포넌트에 알림 (React 이벤트 핸들러 내에서 안전하게 호출)
-        // 이 시점에서 formValues는 아직 업데이트되지 않은 상태이므로 직접 값을 전
-        onPropertyChange(selectedNode.id, fieldId, value);
+    // 포커스 아웃 시 저장
+    const handleBlur = (e) => {
+        console.log("blur", e);
+        // 패널 전체에서 포커스가 완전히 빠질 때만 저장
+        if (!inspectorRef.current.contains(e.relatedTarget)) {
+            // 변경사항이 있으면 저장
+            Object.entries(formValues).forEach(([key, value]) => {
+                if (selectedNode.data.componentProp?.[key] !== value) {
+                    onPropertyChange(selectedNode.id, key, value);
+                }
+            });
+        }
     };
 
     /**
@@ -396,7 +415,10 @@ const NodeInspector = ({ selectedNode, componentTypes, onPropertyChange }) => {
     };
 
     return (
-        <div className="node-inspector">
+        <div className="node-inspector"
+             ref={inspectorRef}
+             onBlur={handleBlur}
+        >
             <div className="inspector-header">
                 <h2 className="component-title">{componentDef.label}</h2>
                 <div className="component-type">{componentType}</div>

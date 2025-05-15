@@ -3,6 +3,12 @@ import { Handle, Position } from 'reactflow';
 import './styles/NodeItem.css';
 
 import ICO from '../../../icon/keyboard_command_key_24dp_E3E3E3_FILL0_wght400_GRAD0_opsz24.svg';
+function formatNodeValue(key, value) {
+    if (key === 'componentType') return null;
+    if (typeof value === 'number') return value.toFixed(2);
+    if (Array.isArray(value)) return `length: ${value.length}`;
+    return value?.toString();
+}
 
 const NodeItem = ({ data, xPos, yPos, type, onDelete }) => {
     return (
@@ -32,6 +38,19 @@ const NodeItem = ({ data, xPos, yPos, type, onDelete }) => {
                 <div className="node-content">
                     <div className="node-position">
                         {data.label}
+                    </div>
+                    <div className="node-content">
+                        {data.componentProp && Object.entries(data.componentProp).map(([key, value]) => {
+                        {/*{data && Object.entries(data).map(([key, value]) => {*/}
+                            const formatted = formatNodeValue(key, value);
+                            if (formatted === null) return null;
+                            return (
+                                <div key={key} className="node-property">
+                                    <span className="property-name">{key}:</span>
+                                    <span className="property-value">{formatted}</span>
+                                </div>
+                            );
+                        })}
                     </div>
                 </div>
                 <Handle type="source" position={Position.Bottom}/>
