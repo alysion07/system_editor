@@ -6,6 +6,10 @@ import {
     generatePresignedDownloadUrl,
     uploadToMinio } from '../services/minioService';
 
+const getFileName = (filePath) => {
+    const parts = filePath.split('/');
+    return parts[parts.length - 1];
+}
 const FileCard = ({ fileName, onDownload }) => (
     <div style={{
         border: '1px solid #ddd',
@@ -16,7 +20,7 @@ const FileCard = ({ fileName, onDownload }) => (
         alignItems: 'center',
         background: '#f9f9f9',
         boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
-        gap: 16
+        gap: 2
     }}>
         <span style={{
             fontSize: 22,
@@ -25,14 +29,15 @@ const FileCard = ({ fileName, onDownload }) => (
         <span style={{
             flex: 1,
             fontWeight: 500,
-            fontSize: 15,
+            fontSize: 12, // 가독성 개선
             color: '#333',
-        }}></span>
-        <span>{fileName}</span>
-        <button onClick={onDownload}>다운로드</button>
+            textAlign: 'left'
+        }}>{getFileName(fileName)}</span>
+        <button onClick={onDownload}>
+            <i className="fas fa-download"></i>
+        </button>
     </div>
 );
-
 
 let BucketName = ''
 let userName = ''
@@ -47,6 +52,14 @@ const MinioManager = ({isTaskComplete, projectFolderPath} ) => {
     const [files, setFiles] = useState([]);
     const [uploadFile, setUploadFile] = useState(null);
     const [uploadPath, setUploadPath] = useState('');
+    const [fileContent, setFileContent] = useState('');
+    const [content, setContent] = useState('');
+
+    const maxPreviewLength = 200000; // 미리보기 최대 글자 수
+
+    const [showFull, setShowFull] = useState(false);
+
+    const previewContent = showFull ? content : content.slice(0, maxPreviewLength);
 
     useEffect(() => {
         const fetchBuckets = async () => {
@@ -62,6 +75,7 @@ const MinioManager = ({isTaskComplete, projectFolderPath} ) => {
 
         fetchBuckets();
     }, []);
+
     useEffect(() => {
         console.log('task complite and reload file list')
         fetchFiles('v-smr')
@@ -69,7 +83,6 @@ const MinioManager = ({isTaskComplete, projectFolderPath} ) => {
     }, [isTaskComplete]);
 
     useEffect(() => {
-        // '/'를 기준으로 projectFolderPath를 나누고 각각 버킷이름, 유저이름, 프로젝트 이름을 추출
         const pathParts = projectFolderPath.split(',');
          BucketName = pathParts[0];
          userName = pathParts[1].split('/')[0];
@@ -81,6 +94,20 @@ const MinioManager = ({isTaskComplete, projectFolderPath} ) => {
         // const fileName = pathParts[3];
 
     }, [projectFolderPath]);
+
+    useEffect(() => {
+        const fetchFileContent = async () => {
+            try {
+                const url = await generatePresignedDownloadUrl(BucketName,`${userName}/${projectName}/run/outdta`);
+                const res = await fetch(url);
+                const text = await res.text();
+                setContent(text);
+            } catch (err) {
+                setError('파일 내용을 불러오지 못했습니다.');
+            }
+        };
+        if (buckets && projectFolderPath) fetchFileContent();
+    }, [buckets, projectFolderPath]);
 
     const fetchFiles = async (bucketName) => {
         try {
@@ -143,11 +170,29 @@ const MinioManager = ({isTaskComplete, projectFolderPath} ) => {
             {/*) : null}*/}
             {selectedBucket && (
                 <div >
-                    <h4> {status} "{projectName? projectName:'결과'}" 파일 리스트</h4>
+                    <h4> {status} "{projectName? projectName:'Result'}" File List</h4>
+                    {content.length > maxPreviewLength && !showFull && (
+                        <button onClick={() => setShowFull(true)}>전체 보기</button>
+                    )}
+                    {content.length > maxPreviewLength && showFull && (
+                        <button onClick={() => setShowFull(false)}>미리보기로 접기</button>
+                    )}
+                    <div style={{
+                        whiteSpace: 'pre-wrap',
+                        background: '#f9f9f9',
+                        padding: 16,
+                        maxHeight: 300,
+                        overflow: 'auto',
+                        border: '1px solid #ddd',
+                        borderRadius: 6
+                    }}>
+                        <h4>내용</h4>
+
+                        <pre style={{margin: 0}}>{previewContent}</pre>
+                    </div>
                     <div style={{ margin: '20px, 10px', borderRadius: 8, padding: '16px', backgroundColor: "#f9f9f9" }}>
                         {files.length > 0 ? (
-                            <div className={"card-list"} style={{display: 'flex',flexDirection: 'row',   justifyContent: 'flex-start', gap: 4}}>
-                            <ul>
+                            <div className={"card-list"} style={{display: 'flex', flexDirection: 'row', justifyContent: 'flex-start', gap: 4}}>
                                 {files.map((file, index) => (
                                     <FileCard
                                         key={index}
@@ -155,7 +200,6 @@ const MinioManager = ({isTaskComplete, projectFolderPath} ) => {
                                         onDownload={() => handleDownload(file)}
                                     />
                                 ))}
-                            </ul>
                             </div>
                         ) : (
                             <p>파일이 없습니다.</p>

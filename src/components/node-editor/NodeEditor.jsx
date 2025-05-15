@@ -212,13 +212,23 @@ const NodeEditor = () => {
     useEffect(() => {
         if (isSimplified) {
             // 간소화 모드: PIPE-JUNCTION-PIPE 병합
+
+            //TODO
+            // const { nodes: simpNodes, edges: simpEdges } = simplifyNodesAndEdges(store.present.nodes, store.present.edges);
+            // setNodes(simpNodes.map(node => ({
+            //     ...node,
+            //     type: 'simple',
+            //     data: { ...node.data, icon: node.data.icon }
+            // })));
+            // setEdges(simpEdges);
+
             const { nodes: simpNodes, edges: simpEdges } = simplifyNodesAndEdges(store.present.nodes, store.present.edges);
-            setNodes(simpNodes.map(node => ({
+            setNodes(store.present.nodes.map(node => ({
                 ...node,
                 type: 'simple',
                 data: { ...node.data, icon: node.data.icon }
             })));
-            setEdges(simpEdges);
+            setEdges(store.present.edges);
         } else {
             setNodes(store.present.nodes.map(node => ({
                 ...node,

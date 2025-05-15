@@ -1,6 +1,6 @@
 // components/TaskManager.js
 import React, { useState, useEffect,useRef, forwardRef, useImperativeHandle } from 'react';
-import {useLocation} from "react-router-dom";
+import {useLocation, useNavigate} from "react-router-dom";
 import * as taskManagerService from '../services/taskManagerService';
 import LiveFileChart from './LiveFileChart';
 import {LiveLogViewer} from "./LogViewer";
@@ -24,6 +24,8 @@ const TaskManager = forwardRef((props, ref) => {
     const [loggingControllers, setLoggingControllers] = useState(null);
     const [currentLine, setCurrentLine] = useState('');
     const [LogLine, setLogLine] = useState('');
+
+    const navigate = useNavigate();
 
     const location = useLocation();
     const uploadArgs  = location.state || '';
@@ -167,16 +169,29 @@ const TaskManager = forwardRef((props, ref) => {
             console.error('다운로드 URL 생성 실패:', error);
         }
     };
+    const getProjectName = (args) => {
+        if (!args) return '';
+        const parts = args.split(',');
+        return parts[1]?.split('/')[1] || '';
+    };
 
     return (
         <div className="task-manager">
-            <div className='task-manager-title'>
-                <h2>Task Manager</h2>
+            <div className={'task-manager-header'}>
+                <button
+                    onClick={() => navigate('/nodeeditor')}
+                >
+                    <i className="fas fa-arrow-left"></i>
+                </button>
+                <div className='task-manager-title'>
+                    <h2>Simulation Manager</h2>
+                </div>
             </div>
+
             {error && <div className="error-message">{error}</div>}
             {isTaskCompleted && (
                 <div className="task-completed">
-                    <h4>Task has been completed successfully!</h4>
+                    <h2 className="custom-title"> '{getProjectName(uploadArgs)}' has been completed</h2>
                     <MinioManager isTaskComplete={useStreaming}
                                    projectFolderPath={uploadArgs}
                     />
@@ -192,54 +207,53 @@ const TaskManager = forwardRef((props, ref) => {
                 <LiveLogViewer incomingLine={LogLine}/>
             </div>
 
+            {/*<div className="task-controls">*/}
+            {/*    <div className="input-group">*/}
+            {/*        <label htmlFor="args">Task Arguments (comma-separated):</label>*/}
+            {/*        <input*/}
+            {/*            id="args"*/}
+            {/*            type="text"*/}
+            {/*            value={args}*/}
+            {/*            onChange={(e) => setArgs(e.target.value)}*/}
+            {/*            placeholder="arg1, arg2, arg3"*/}
+            {/*        />*/}
+            {/*    </div>*/}
+            {/*    */}
+            {/*    <div className="mode-selector">*/}
+            {/*        <label>*/}
+            {/*            <input*/}
+            {/*                type="checkbox"*/}
+            {/*                checked={useStreaming}*/}
+            {/*                onChange={(e) => setUseStreaming(e.target.checked)}*/}
+            {/*            />*/}
+            {/*            Use Streaming Mode*/}
+            {/*        </label>*/}
+            {/*    </div>*/}
 
-            <div className="task-controls">
-                <div className="input-group">
-                    <label htmlFor="args">Task Arguments (comma-separated):</label>
-                    <input
-                        id="args"
-                        type="text"
-                        value={args}
-                        onChange={(e) => setArgs(e.target.value)}
-                        placeholder="arg1, arg2, arg3"
-                    />
-                </div>
-                
-                {/*<div className="mode-selector">*/}
-                {/*    <label>*/}
-                {/*        <input*/}
-                {/*            type="checkbox"*/}
-                {/*            checked={useStreaming}*/}
-                {/*            onChange={(e) => setUseStreaming(e.target.checked)}*/}
-                {/*        />*/}
-                {/*        Use Streaming Mode*/}
-                {/*    </label>*/}
-                {/*</div>*/}
+            {/*    <div className="button-group">*/}
+            {/*        <button*/}
+            {/*            onClick={HandleStartTask}*/}
+            {/*            disabled={isLoading || !args.trim()}*/}
+            {/*        >*/}
+            {/*            Start Simulation*/}
+            {/*        </button>*/}
+            {/*        <>*/}
+            {/*            <button*/}
+            {/*                onClick={handleGetScreenLog}*/}
+            {/*                disabled={isLoading}*/}
+            {/*            >*/}
+            {/*                Get Screen Log Manually*/}
+            {/*            </button>*/}
 
-                {/*<div className="button-group">*/}
-                {/*    <button*/}
-                {/*        onClick={HandleStartTask}*/}
-                {/*        disabled={isLoading || !args.trim()}*/}
-                {/*    >*/}
-                {/*        Start Simulation*/}
-                {/*    </button>*/}
-                {/*    <>*/}
-                {/*        <button*/}
-                {/*            onClick={handleGetScreenLog}*/}
-                {/*            disabled={isLoading}*/}
-                {/*        >*/}
-                {/*            Get Screen Log Manually*/}
-                {/*        </button>*/}
-
-                {/*        <button*/}
-                {/*            onClick={handleGetPlotLog}*/}
-                {/*            disabled={isLoading}*/}
-                {/*        >*/}
-                {/*            Get Plot Log Manually*/}
-                {/*        </button>*/}
-                {/*    </>*/}
-                {/*</div>*/}
-            </div>
+            {/*            <button*/}
+            {/*                onClick={handleGetPlotLog}*/}
+            {/*                disabled={isLoading}*/}
+            {/*            >*/}
+            {/*                Get Plot Log Manually*/}
+            {/*            </button>*/}
+            {/*        </>*/}
+            {/*    </div>*/}
+            {/*</div>*/}
         </div>
     );
 });
