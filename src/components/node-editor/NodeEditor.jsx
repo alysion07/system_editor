@@ -412,6 +412,7 @@ const NodeEditor = () => {
 
 
                 <div className="reactflow-wrapper" ref={reactFlowWrapper}
+
                         onDrop={handleDrop}
                 >
                     <ReactFlow
