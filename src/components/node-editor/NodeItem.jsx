@@ -10,7 +10,7 @@ function formatNodeValue(key, value) {
     return value?.toString();
 }
 
-const NodeItem = ({ data, xPos, yPos, type, onDelete }) => {
+const NodeItem = ({ data, type, onDelete }) => {
     return (
         <div className="node">
             <div className={`node-header-${data.componentType}`}>
@@ -24,8 +24,9 @@ const NodeItem = ({ data, xPos, yPos, type, onDelete }) => {
                         className="node-delete-btn"
                         onClick={(e) => {
                             e.stopPropagation();
-                            if (onDelete) onDelete();
-                            // TODO : 삭제기능 구현 필요
+                            console.log('delete button clicked', data.onDelete);
+                            if (data.onDelete)
+                                data.onDelete();
                         }}
                     >
                         ×

@@ -9,7 +9,6 @@ const state = {
   pollingIntervals: new Map(),
   eol: ''
 };
-const SERVICE_URL_TEST = 'http://121.148.223.175:31838';
 const SERVICE_URL = 'http://129.254.222.219:8443'
 // 초기화 함수
 export const initializeTaskManagerService = (serviceUrl = SERVICE_URL) => {

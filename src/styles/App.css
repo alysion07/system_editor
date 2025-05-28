@@ -36,8 +36,7 @@ body {
 
 .right-panel {
     width: auto;
-    min-width: 300px;
-    max-width: 600px;
+    max-width: 500px;
     background-color: #f0f0f0;
     border-left: 1px solid #ddd;
     overflow-y: auto;

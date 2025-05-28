@@ -183,7 +183,7 @@ export function SimplifiedNode({ id, data, type }) {
                             y={h / 2}
                             textAnchor="middle"           // 텍스트 중앙 정렬
                             dominantBaseline="middle"     // 수직 중앙 정렬
-                            fontSize="12"
+                            fontSize="24px"            // 폰트 크기
                             fill="#333"                   // 텍스트 색
                         >
                             {getSimpleLabel()}

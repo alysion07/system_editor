@@ -61,31 +61,6 @@ const NodeInspector = ({ selectedNode, componentTypes, onPropertyChange }) => {
         );
     }
 
-    /**
-     * Handle field value change
-     * @param {string} fieldId - ID of the field being changed
-     * @param {any} value - New value for the field
-     */
-    // const handleFieldChange = (fieldId, value) => {
-    //     // Update local form state
-    //     setFormValues(prev => {
-    //         const newValues = { ...prev, [fieldId]: value };
-    //
-    //         // Process automatic calculations based on related fields
-    //         const updatedValues = processRelatedFields(fieldId, newValues, componentDef);
-    //
-    //         // Validate the updated field
-    //         validateField(fieldId, updatedValues[fieldId], updatedValues);
-    //
-    //         return updatedValues;
-    //     });
-    //
-    //     //TODO 발생 오류 확인 필요 'Uncaught TypeError: onPropertyChange is not a function'
-    //     // 상태 업데이트 후 부모 컴포넌트에 알림 (React 이벤트 핸들러 내에서 안전하게 호출)
-    //     // 이 시점에서 formValues는 아직 업데이트되지 않은 상태이므로 직접 값을 전
-    //     onPropertyChange(selectedNode.id, fieldId, value);
-    // };
-
         // 입력값 변경 핸들러
     const handleFieldChange = (key, value) => {
             setFormValues(prev => ({ ...prev, [key]: value }));

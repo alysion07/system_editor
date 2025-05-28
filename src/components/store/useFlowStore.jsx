@@ -62,27 +62,28 @@ const useFlowStore = create((set, get) => ({
         };
         set([...present.nodes, newNode], present.edges);
     },
-    dropNode: (type, position) => {
+    dropNode: (type, position, handleDeleteNode) => {
         const { present, set } = get();
+        const newId =  `${+new Date()}`;
         const newNode = {
-            id: `${+new Date()}`,
+            id: newId,
             type: 'node',
             position,
-            xPos: position.x,
-            yPos: position.y,
-            data: { label: type, componentType: type },
+            data: { label: type, componentType: type,
+                onDelete: () => handleDeleteNode?.(newId),
+            },
+
         };
         set([...present.nodes, newNode], present.edges);
     },
-    deleteSelectedNode: () => {
-        const state = get();
-        const { present, selectedNodeId } = state;
-        if (!selectedNodeId) return;
-        const nodes = present.nodes.filter((n) => n.id !== selectedNodeId);
-        const edges = present.edges.filter((e) => e.source !== selectedNodeId && e.target !== selectedNodeId);
-        state.set(nodes, edges);
-        set({ selectedNodeId: null });
+    deleteNode: (nodeId) => {
+        const { present, set } = get();
+        const nodes = present.nodes.filter((n) => n.id !== nodeId);
+        const edges = present.edges.filter((e) => e.source !== nodeId && e.target !== nodeId);
+        set(nodes, edges);
+        selectedNodeId: null
     },
+
     setSelectedNodeId: (id) => set({ selectedNodeId: id }),
 
     setNodeDragStart: (event, node, nodes) => {

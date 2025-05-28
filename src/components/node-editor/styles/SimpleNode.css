@@ -4,6 +4,7 @@
     border: 1px solid #666666;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
     font-family: 'pretendard';
+    font-size: 50px;
     display: flex;
     align-items: center;
     justify-content: space-between;
