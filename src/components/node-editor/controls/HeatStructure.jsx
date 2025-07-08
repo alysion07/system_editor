@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, {useState, useEffect, useRef, Fragment} from 'react';
 import '../styles/HeatStructure.css';
 
 // 메인 애플리케이션 컴포넌트
-const HeatStructure = ({selectedNode}) => {
+const HeatStructure = ({selectedNode, onPropertyChange}) => {
   // 탭 상태 관리
   const [activeTab, setActiveTab] = useState('general');
 
@@ -16,7 +16,10 @@ const HeatStructure = ({selectedNode}) => {
           <TabNavigation activeTab={activeTab} setActiveTab={setActiveTab} />
 
           <div className="content-container">
-            {activeTab === 'general' && <GeneralDataTab selectedNode = {selectedNode}/> }
+            {activeTab === 'general' && <GeneralDataTab
+                selectedNode = {selectedNode}
+                onPropertyChange={onPropertyChange}
+            /> }
             {activeTab === 'mesh' && <MeshDataTab />}
             {activeTab === 'material' && <MaterialDataTab />}
             {activeTab === 'boundary' && <BoundaryConditionTab />}
@@ -53,8 +56,16 @@ const TabNavigation = ({ activeTab, setActiveTab }) => {
 };
 
 // 일반 데이터 탭 컴포넌트
-const GeneralDataTab = ({selectedNode}) => {
+const GeneralDataTab = ({ selectedNode, onPropertyChange }) => {
   const [refloodFlag, setRefloodFlag] = useState('0');
+
+
+  // 입력값 변경 핸들러
+  const handleChange = (key, value) => {
+    if (onPropertyChange && selectedNode) {
+      onPropertyChange(selectedNode.id, key, value);
+    }
+  };
 
   return (
       <div className="tab-content">
@@ -76,6 +87,7 @@ const GeneralDataTab = ({selectedNode}) => {
               max="999"
               defaultValue= "000"
               value={selectedNode ? selectedNode.compNumber: "1000"}
+              onChange={ e => handleChange('compNumber', e.target.value)}  // 예시로 onChange 핸들러 추가}
           />
           <div className="helper-text">1000-1999 사이의 값을 입력하세요. 가능하면 관련 유체 볼륨과 일치시키는 것을 권장합니다.</div>
         </div>
@@ -184,7 +196,8 @@ const GeneralDataTab = ({selectedNode}) => {
             <option value="1">거의 빈 상태일 때 시작 (1)</option>
             <option value="2">건조 시작 시 시작 (2)</option>
             <option value="trip">트립 번호 지정</option>
-          </select>
+          <Fragment></Fragment>
+        </select>
           <div className="helper-text">리플러드 계산이 시작되는 조건을 선택하세요.</div>
         </div>
 

@@ -3239,8 +3239,8 @@ export const componentTypes = {
         }
     },
 
-    HEATSTR: {
-        type: 'HEATSTR',
+    HTSTR: {
+        type: 'HTSTR',
         label: 'HS',
         description: '열구조체는 고체 재료 내부의 1차원 열전달을 모델링합니다.',
         category: 'thermal',

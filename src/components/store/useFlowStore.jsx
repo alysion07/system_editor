@@ -12,6 +12,7 @@ const useFlowStore = create((set, get) => ({
     canRedo: false,
     dragStartNodes: null,
 
+
     set: (nodes, edges) => {
 
         const { past, present} = get();
@@ -81,7 +82,7 @@ const useFlowStore = create((set, get) => ({
         const nodes = present.nodes.filter((n) => n.id !== nodeId);
         const edges = present.edges.filter((e) => e.source !== nodeId && e.target !== nodeId);
         set(nodes, edges);
-        selectedNodeId: null
+        store.selectedNodeId = null; // 선택 초기화
     },
 
     setSelectedNodeId: (id) => set({ selectedNodeId: id }),

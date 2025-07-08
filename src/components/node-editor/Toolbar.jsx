@@ -129,16 +129,17 @@ const Toolbar = ({
     }, [isEditing]);
 
     return (
-        <div className="editor-toolbar" >
+        <div className="editor-toolbar">
             <div className="toolbar-group">
-                <button className="toolbar-button"  style={{width: 'auto', border : '1px solid #ccc'}} onClick={onGeneralSetting} title="General Setting">
+                <button className="toolbar-button" style={{width: 'auto', border: '1px solid #ccc'}}
+                        onClick={onGeneralSetting} title="General Setting">
                     Input Setting
                 </button>
 
             </div>
             <div className="toolbar-divider"></div>
-            <button className="toolbar-button"  style={{width: 'auto', }} onClick={onSimplify} title="Simplify">
-                <i className= { isSimplified ? "fas fa-expand-arrows-alt" :"fas fa-compress-arrows-alt" } ></i>
+            <button className="toolbar-button" style={{width: 'auto',}} onClick={onSimplify} title="Simplify">
+                <i className={isSimplified ? "fa-solid fa-toggle-on" : "fa-solid fa-toggle-off"}></i>
             </button>
             <div className="toolbar-divider"></div>
 
@@ -154,28 +155,28 @@ const Toolbar = ({
             <div className="toolbar-divider"></div>
 
             <div className="toolbar-section project-name">
-                 {isEditing ? (
-                     <input
-                         ref={inputRef}
-                         type="text"
-                         value={projectName}
-                         onChange={(e) => onProjectNameChange(e.target.value)}
-                         onBlur={handleProjectNameBlur}
-                         onKeyDown={handleProjectNameKeyDown}
-                         className="project-name-input"
-                     />
-                 ) : (
-                     <h5 onClick={handleProjectNameClick}>{projectName}</h5>
-                 )}
-             </div>
+                {isEditing ? (
+                    <input
+                        ref={inputRef}
+                        type="text"
+                        value={projectName}
+                        onChange={(e) => onProjectNameChange(e.target.value)}
+                        onBlur={handleProjectNameBlur}
+                        onKeyDown={handleProjectNameKeyDown}
+                        className="project-name-input"
+                    />
+                ) : (
+                    <h5 onClick={handleProjectNameClick}>{projectName}</h5>
+                )}
+            </div>
 
             <div className="toolbar-right">
                 <div className="toolbar-group">
                     <button className="toolbar-button" onClick={onImport} title="불러오기">
-                        <i className="fas fa-upload"></i>
+                        <i className="fa-solid fa-file-import"></i>
                     </button>
                     <button className="toolbar-button" onClick={onExport} title="내보내기">
-                        <i className="fas fa-download"></i>
+                        <i className="fa-solid fa-file-export"></i>
                     </button>
                 </div>
 
@@ -183,7 +184,7 @@ const Toolbar = ({
             </div>
             <div className="toolbar-divider"></div>
 
-            <FileUploader projectTitle={projectName} />
+            <FileUploader projectTitle={projectName}/>
 
         </div>
     );

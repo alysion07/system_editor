@@ -10,15 +10,14 @@ import ReactFlow, {
 
 import useFlowStore from '../store/useFlowStore.jsx';
 import { componentTypes } from './ComponentsType.jsx';
+import NodeItem from './NodeItem.jsx';
 
 import NodePalette from './NodePalette.jsx';
+import NodeInspector from "./NodeInspector.jsx";
 
-import NodeItem from './NodeItem.jsx';
+import Toolbar from "./Toolbar.jsx";
 import {SimplifiedNode} from "./simpleNode.jsx";
 import HeatStructure from "./controls/HeatStructure.jsx";
-
-import NodeInspector from "./NodeInspector.jsx";
-import Toolbar from "./Toolbar.jsx";
 import GeneralSettingPane from "./GeneralSettingPane.jsx";
 
 import ICO from '../../../icon/keyboard_command_key_24dp_E3E3E3_FILL0_wght400_GRAD0_opsz24.svg';
@@ -52,7 +51,7 @@ const NodeEditor = () => {
             setNodes(store.present.nodes.map(node => ({
                 ...node,
                 type: 'simple',
-                data: { ...node.data, icon: node.data.icon }
+                data: {...node.data, icon: node.data.icon}
             })));
             setEdges(store.present.edges);
         } else {
@@ -74,9 +73,9 @@ const NodeEditor = () => {
         setEdges(updatedEdges);
     }, [nodes, edges, store]);
 
-    const handleNodeDragStart = useCallback( (event, node, nodes) => {
+    const handleNodeDragStart = useCallback((event, node, nodes) => {
         store.setNodeDragStart(event, node, nodes)
-    }, [[nodes, nodes, edges]] )
+    }, [[nodes, nodes, edges]])
 
 // 컴포넌트에서 사용
     const handleNodeDragStop = useCallback((_, draggedNode) => {
@@ -95,7 +94,7 @@ const NodeEditor = () => {
     }, []);
 
     const onGenSettings = useCallback(() => {
-        setSelectedNode({id: 'genset', type: 'GENSET', data: { label: 'Genset', componentType: 'GENSET' }});
+        setSelectedNode({id: 'genset', type: 'GENSET', data: {label: 'Genset', componentType: 'GENSET'}});
     }, []);
 
     const handleDeleteNode = useCallback((nodeId) => {
@@ -132,11 +131,12 @@ const NodeEditor = () => {
         const componentType = selectedNode.data.componentType;
 
         // componentType에 따라 다른 컴포넌트 렌더링
-        switch(componentType) {
+        switch (componentType) {
             case "HTSTR":
                 return (
                     <HeatStructure
                         selectedNode={selectedNode}
+                        onPropertyChange={handlePropChange}
                     />
                 );
             case "SNGLVOL":
@@ -153,8 +153,8 @@ const NodeEditor = () => {
 
                     />
                 );
-                case "GENSET":
-                    return ( <GeneralSettingPane/>);
+            case "GENSET":
+                return (<GeneralSettingPane/>);
             default:
                 console.log("Unknown component type:", componentType);
                 return (
@@ -177,7 +177,7 @@ const NodeEditor = () => {
             const flowData = reactFlowInstance.toObject();
             const jsonString = JSON.stringify(flowData, null, 2);
 
-            const blob = new Blob([jsonString], { type: 'application/json' });
+            const blob = new Blob([jsonString], {type: 'application/json'});
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
@@ -210,7 +210,7 @@ const NodeEditor = () => {
 
                     // ReactFlow 화면 중앙 맞추기
                     setTimeout(() => {
-                        reactFlowInstance?.fitView({ padding: 0.1 });
+                        reactFlowInstance?.fitView({padding: 0.1});
                     }, 50);
                 } else {
                     alert('유효하지 않은 다이어그램 파일입니다.');
@@ -226,7 +226,6 @@ const NodeEditor = () => {
     }, [store, reactFlowInstance, setProjectName]);
 
     const handleSimplify = useCallback(() => {
-        console.log('handleSimplify');
         setIsSimplified(prev => !prev);
     }, []);
 
@@ -234,17 +233,14 @@ const NodeEditor = () => {
         store.updateNodeProp(nodeId, key, value);
     };
 
-
     return (
         <div className="node-editor">
 
-            <NodePalette componentsType={componentTypes} />
+            <NodePalette componentsType={componentTypes}/>
             <ReactFlowProvider>
 
-
                 <div className="reactflow-wrapper" ref={reactFlowWrapper}
-
-                        onDrop={handleDrop}
+                     onDrop={handleDrop}
                 >
                     <ReactFlow
                         onDragOver={handleDragOver}
@@ -258,7 +254,7 @@ const NodeEditor = () => {
                         onNodeDragStart={handleNodeDragStart}
                         onNodeDragStop={handleNodeDragStop}
                         onEdgesChange={handleEdgesChange}
-                        defaultEdgeOptions={{ type: 'smoothstep' }}
+                        defaultEdgeOptions={{type: 'smoothstep'}}
                         connectionLineType='smoothstep'
                         onConnect={handleConnect}
                         onPaneClick={onPaneClick}
@@ -280,15 +276,15 @@ const NodeEditor = () => {
                             ref={fileInputRef}
                             type="file"
                             accept=".json"
-                            style={{ display: 'none' }}
+                            style={{display: 'none'}}
                             onChange={handleFileChange}
                         />
-                        <Controls />
-                        <Background />
+                        <Controls/>
+                        <Background/>
                     </ReactFlow>
                 </div>
                 <div className="right-panel">
-                    {selectedNode ? renderInspector() :  null }
+                    {selectedNode ? renderInspector() : null}
                 </div>
             </ReactFlowProvider>
         </div>

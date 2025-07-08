@@ -115,7 +115,7 @@ export const generateMarsInputFile = (nodes, connections, projectName) => {
             case 'TMDPJUN':
                 output += generateTmdpjunSection(node);
                 break;
-            case 'HEATSTR':
+            case 'HTSTR':
                 output += generateHeatstrSection(node);
                 break;
             case 'SNGLVOL':

@@ -34,14 +34,6 @@ body {
     overflow: hidden;
 }
 
-.right-panel {
-    width: auto;
-    max-width: 500px;
-    background-color: #f0f0f0;
-    border-left: 1px solid #ddd;
-    overflow-y: auto;
-    z-index: 10;
-}
 .connections-container {
     width: 100%;
     height: 100%;
