@@ -1,10 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {
-    listBuckets,
-    listFilesInBucket,
-    listFilesInFolder,
-    generatePresignedDownloadUrl,
-    uploadToMinio } from '../services/minioService';
+import { ProjectService } from '../services/projectService';
 
 const getFileName = (filePath) => {
     const parts = filePath.split('/');
@@ -64,7 +59,7 @@ const MinioManager = ({isTaskComplete, projectFolderPath} ) => {
     useEffect(() => {
         const fetchBuckets = async () => {
             try {
-                const bucketList = await listBuckets();
+                const bucketList = await ProjectService.listBuckets();
                 setStatus('✅');
                 setBuckets(bucketList);
             } catch (err) {
@@ -98,12 +93,12 @@ const MinioManager = ({isTaskComplete, projectFolderPath} ) => {
     useEffect(() => {
         const fetchFileContent = async () => {
             try {
-                const url = await generatePresignedDownloadUrl(BucketName,`${userName}/${projectName}/run/outdta`);
+                const url = await ProjectService.getSignedDownloadUrl(`${userName}/${projectName}/run/outdta`);
                 const res = await fetch(url);
                 const text = await res.text();
                 setContent(text);
             } catch (err) {
-                setError('파일 내용을 불러오지 못했습니다.');
+                console.log('파일 내용을 불러오지 못했습니다.');
             }
         };
         if (buckets && projectFolderPath) fetchFileContent();
@@ -113,7 +108,7 @@ const MinioManager = ({isTaskComplete, projectFolderPath} ) => {
         try {
             // const fileList = await listFilesInBucket(bucketName, 'yjcho/project2/run/');
             console.log('projectFolderPath: ', projectFolderPath)
-            const fileList = await listFilesInFolder(bucketName, `${userName}/${projectName}/run`);
+            const fileList = await ProjectService.listProjects(`${userName}/${projectName}/run`);
             setFiles(fileList);
             setSelectedBucket(bucketName);
         } catch (error) {
@@ -123,7 +118,7 @@ const MinioManager = ({isTaskComplete, projectFolderPath} ) => {
 
     const handleDownload = async (fileName) => {
         try {
-            const url = await generatePresignedDownloadUrl(selectedBucket, fileName);
+            const url = await ProjectService.getSignedDownloadUrl(fileName);
             window.open(url, '_blank');
         } catch (error) {
             console.error('다운로드 URL 생성 실패:', error);
@@ -141,7 +136,7 @@ const MinioManager = ({isTaskComplete, projectFolderPath} ) => {
         }
 
         try {
-            await uploadToMinio(selectedBucket, uploadPath, uploadFile);
+            await ProjectService.uploadProjectJson(userName, uploadPath, uploadFile);
             alert('업로드 성공!');
             fetchFiles(selectedBucket);
         } catch (error) {

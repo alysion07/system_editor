@@ -1,93 +1,88 @@
 // Toolbar.jsx
 import {useRef, useState, useEffect, useCallback} from 'react';
 import {useNavigate} from "react-router-dom";
-import {uploadToMinio} from "../../services/minioService";
+import { ProjectService } from "../../services/projectService";
 
 import './styles/Toolbar.css';
-
-const INPUT = './'
-
-const FileUploader = ( {projectTitle}) => {
-
-    const fileInputRef  = useRef(null);
-    const navigate = useNavigate();
-
-    const  handleClick = async () => {
-        // fileInputRef.current.click();
-
-        const bucket = 'v-smr';
-        const userName = 'yjcho';
-        const project = projectTitle;
-        const uploadPath = userName + '/' + project + '/SMART.i';
-
-        try {
-            // public/resource/smart.i 파일을 fetch로 읽기
-            const response = await fetch('/resource/SMART.i');
-            if (!response.ok) throw new Error('파일을 불러올 수 없습니다.');
-            const fileBlob = await response.blob();
-
-            // Blob을 File 객체로 변환 (Minio 업로드 함수가 File 필요시)
-            const file = new File([fileBlob], 'SMART.i', { type: fileBlob.type });
-
-            const isSuccess = await uploadToMinio(bucket, uploadPath, file);
-
-            if (isSuccess) {
-                const args = `${bucket},${userName}/${project},SMART.i`;
-                navigate("/task", { state: args });
-            } else {
-                alert("업로드 실패!");
-            }
-        } catch (error) {
-            alert('업로드 실패: ' + error.message);
-            console.error('업로드 실패:', error);
-        }
-    };
-
-    const handleChange = async (event) => {
-
-        const bucket = 'v-smr'
-        const file = event.target.files[0];
-        const userName = 'yjcho'
-        const project = projectTitle
-        console.log(file);
-
-        const uploadPath = userName + '/' + project + '/' + file.name;
-        console.log(uploadPath);
-
-        try {
-            const isSuccess = await uploadToMinio(bucket, uploadPath, file);
-
-            if (isSuccess) {
-                const args  = `${bucket},${userName}/${project},${file.name}`;
-
-                navigate("/task", { state : args});
-            } else {
-                alert("업로드 실패!");
-            }
-
-        } catch (error) {
-            console.error('업로드 실패:', error);
-        }
-    };
-
-    return (
-        <div>
-            <button className="toolbar-button"
-                    style={{width: 'auto', border : '1px solid #ccc'}}
-                    onClick={handleClick}
-            >
-                Simulation Start
-            </button>
-            <input
-                type="file"
-                ref={fileInputRef}
-                onChange={handleChange}
-                style={{ display: 'none' }}
-            />
-        </div>
-    );
-};
-
+//
+// const INPUT = './'
+//
+// const FileUploader = ( {projectTitle}) => {
+//
+//     const fileInputRef  = useRef(null);
+//     const navigate = useNavigate();
+//
+//     const  handleClick = async () => {
+//         // fileInputRef.current.click();
+//
+//         const bucket = 'v-smr';
+//         const userName = 'yjcho';
+//         const project = projectTitle;
+//         const uploadPath = userName + '/' + project + '/SMART.i';
+//
+//         try {
+//             // public/resource/smart.i 파일을 fetch로 읽기
+//             const response = await fetch('/resource/SMART.i');
+//             if (!response.ok) throw new Error('파일을 불러올 수 없습니다.');
+//             const fileBlob = await response.blob();
+//
+//             // Blob을 File 객체로 변환 (Minio 업로드 함수가 File 필요시)
+//             const file = new File([fileBlob], 'SMART.i', { type: fileBlob.type });
+//
+//             const isSuccess = await projectService.uploadToMinio(bucket, uploadPath, file);
+//
+//             if (isSuccess) {
+//                 const args = `${bucket},${userName}/${project},SMART.i`;
+//                 navigate("/task", { state: args });
+//             } else {
+//                 alert("업로드 실패!");
+//             }
+//         } catch (error) {
+//             alert('업로드 실패: ' + error.message);
+//             console.error('업로드 실패:', error);
+//         }
+//     };
+//
+//     const handleChange = async (event) => {
+//         console.log("업로드를 해당 위치에서 수행하지 않음. 프로젝트 관리 기능으로 이관")
+//         // const bucket = 'v-smr'
+//         // const file = event.target.files[0];
+//         // const userName = 'yjcho'
+//         // const project = projectTitle
+//         // console.log(file);
+//         //
+//         // const uploadPath = userName + '/' + project + '/' + file.name;
+//         // console.log(uploadPath);
+//         //
+//         // try {
+//         //     const blob = new Blob([JSON.stringify(flowData)], { type: 'application/json' });
+//         //     const isSuccess = await ProjectService.uploadProjectJson(userId, projectName, blob);
+//         //
+//         //     if (isSuccess) {
+//         //         const args  = `${bucket},${userName}/${project},${file.name}`;
+//         //
+//         //         navigate("/task", { state : args});
+//         //     } else {
+//         //         alert("업로드 실패!");
+//         //     }
+//         //
+//         // } catch (error) {
+//         //     console.error('업로드 실패:', error);
+//         // }
+//     };
+//
+//     return (
+//         <div>
+//             <button className="toolbar-button"
+//                     style={{width: 'auto', border : '1px solid #ccc'}}
+//                     onClick={handleClick}
+//             >
+//                 Simulation Start
+//             </button>
+//         </div>
+//     );
+// };
+//
 
 const Toolbar = ({
                      onUndo,
@@ -100,8 +95,7 @@ const Toolbar = ({
                      onSimplify,
                      isSimplified,
                      projectName,
-                     onProjectNameChange,
-                     onFileChange,
+                     onSave
                  }) => {
 
     const [isEditing, setIsEditing] = useState(false);
@@ -155,20 +149,17 @@ const Toolbar = ({
             <div className="toolbar-divider"></div>
 
             <div className="toolbar-section project-name">
-                {isEditing ? (
-                    <input
-                        ref={inputRef}
-                        type="text"
-                        value={projectName}
-                        onChange={(e) => onProjectNameChange(e.target.value)}
-                        onBlur={handleProjectNameBlur}
-                        onKeyDown={handleProjectNameKeyDown}
-                        className="project-name-input"
-                    />
-                ) : (
-                    <h5 onClick={handleProjectNameClick}>{projectName}</h5>
-                )}
+                <h5 title="현재 프로젝트">{projectName || '(이름 없음)'}</h5>
             </div>
+
+            <button
+                className="toolbar-button"
+                title="프로젝트 저장"
+                onClick={onSave}
+                disabled={!projectName}  // 이름 없으면 저장 금지
+            >
+                <i className="fa-solid fa-save"></i>
+            </button>
 
             <div className="toolbar-right">
                 <div className="toolbar-group">
@@ -184,7 +175,7 @@ const Toolbar = ({
             </div>
             <div className="toolbar-divider"></div>
 
-            <FileUploader projectTitle={projectName}/>
+            {/*<FileUploader projectTitle={projectName}/>*/}
 
         </div>
     );

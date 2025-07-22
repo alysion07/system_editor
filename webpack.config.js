@@ -1,3 +1,4 @@
+// webpack.config.js
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const webpack = require('webpack');
@@ -12,23 +13,50 @@ module.exports = {
     devtool: 'eval-source-map',
     module: {
         rules: [
+            // JS/JSX → Babel
             {
                 test: /\.(js|jsx)$/,
                 exclude: /node_modules/,
                 use: {
                     loader: 'babel-loader',
                     options: {
-                        presets: ['@babel/preset-env', ['@babel/preset-react', {
-                            runtime: 'automatic',
-                            sourcemap: true
-                        }]]
+                        presets: [
+                            '@babel/preset-env',
+                            ['@babel/preset-react', { runtime: 'automatic', sourcemap: true }]
+                        ]
                     }
                 }
             },
+
+            // Tailwind/PostCSS 처리 (index.css 전용)
+            {
+                test: /index\.css$/,
+                include: path.resolve(__dirname, 'src'),
+                use: [
+                    'style-loader',
+                    'css-loader',
+                    {
+                        loader: 'postcss-loader',
+                        options: {
+                            postcssOptions: {
+                                config: path.resolve(__dirname, 'postcss.config.cjs')
+                            }
+                        }
+                    }
+                ]
+            },
+
+            // 일반 CSS (나머지 .css 파일)
             {
                 test: /\.css$/,
-                use: ['style-loader', 'css-loader']
+                exclude: path.resolve(__dirname, 'src/index.css'),
+                use: [
+                    'style-loader',
+                    'css-loader'
+                ]
             },
+
+            // 이미지 등 에셋 리소스
             {
                 test: /\.(png|svg|jpg|jpeg|gif)$/i,
                 type: 'asset/resource',
@@ -38,25 +66,21 @@ module.exports = {
     resolve: {
         extensions: ['.js', '.jsx'],
         fallback: {
-            "buffer": require.resolve("buffer/"),
-            "util": require.resolve("util/"),
-            "stream": require.resolve("stream-browserify"),
+            buffer: require.resolve('buffer/'),
+            util: require.resolve('util/'),
+            stream: require.resolve('stream-browserify'),
             'process/browser': require.resolve('process/browser')
         }
     },
     plugins: [
-        new HtmlWebpackPlugin({
-            template: './public/index.html',
-        }),
+        new HtmlWebpackPlugin({ template: './public/index.html' }),
         new webpack.ProvidePlugin({
             Buffer: ['buffer', 'Buffer'],
             process: 'process/browser',
         }),
     ],
     devServer: {
-        static: {
-            directory: path.join(__dirname, 'public'),
-        },
+        static: { directory: path.join(__dirname, 'public') },
         port: 3000,
         hot: true,
         historyApiFallback: true

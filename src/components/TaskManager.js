@@ -6,7 +6,7 @@ import LiveFileChart from './LiveFileChart';
 import {LiveLogViewer} from "./LogViewer";
 import MinioManager from "./MinIOTester";
 import './TaskManager.css'
-import { listBuckets, listFilesInBucket, generatePresignedDownloadUrl, uploadToMinio } from '../services/minioService';
+import { ProjectService } from '../services/projectService';
 
 //v-smr,user1/project1,plotfl
 
@@ -28,6 +28,7 @@ const TaskManager = forwardRef((props, ref) => {
     const navigate = useNavigate();
 
     const location = useLocation();
+    // TODO: use
     const uploadArgs  = location.state || '';
     const isTaskStarted = useRef(false);
     const [files, setFiles] = useState([]);
@@ -114,7 +115,7 @@ const TaskManager = forwardRef((props, ref) => {
     useImperativeHandle(ref, () => ({
         handleStartTask: startTask  // 외부로 이 함수를 노출!
     }))
-
+/*
     // 수동으로 로그 가져오기
     const handleGetScreenLog = async () => {
         if (!taskId) return;
@@ -155,20 +156,23 @@ const TaskManager = forwardRef((props, ref) => {
 
     const fetchFiles = async (bucketName) => {
         try {
-            const fileList = await listFilesInBucket('v-smr');
+            const fileList = await ProjectService.listProjects();
             setFiles(fileList);
         } catch (error) {
             console.error('파일 가져오기 실패:', error);
         }
     };
+    */
     const handleDownload = async (fileName) => {
         try {
-            const url = await generatePresignedDownloadUrl('v-smr', fileName);
+            const url = await ProjectService.getSignedDownloadUrl(fileName);
             window.open(url, '_blank');
         } catch (error) {
             console.error('다운로드 URL 생성 실패:', error);
         }
     };
+
+
     const getProjectName = (args) => {
         if (!args) return '';
         const parts = args.split(',');
@@ -192,9 +196,10 @@ const TaskManager = forwardRef((props, ref) => {
             {isTaskCompleted && (
                 <div className="task-completed">
                     <h2 className="custom-title"> '{getProjectName(uploadArgs)}' has been completed</h2>
-                    <MinioManager isTaskComplete={useStreaming}
-                                   projectFolderPath={uploadArgs}
-                    />
+                    // TODO Minio 관련 처리 필요
+                    {/*<MinioManager isTaskComplete={useStreaming}*/}
+                    {/*               projectFolderPath={uploadArgs}*/}
+                    {/*/>*/}
                 </div>
 
             )}

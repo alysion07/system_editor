@@ -1,0 +1,54 @@
+.homepage-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    min-height: 100vh;
+}
+
+.homepage-title {
+    color: var(--text-color);
+    margin-top: 100px;
+    margin-bottom: 20px;
+}
+
+.homepage-form {
+    margin-bottom: 20px;
+    width: 250px;
+}
+
+.homepage-input {
+    padding: 8px;
+    width: 100%;
+    margin-bottom: 10px;
+    display: block;
+    border: 1px solid var(--input-border);
+    border-radius: 4px;
+    background-color: var(--input-bg);
+    color: var(--input-text);
+    font-size: 14px;
+}
+
+.homepage-input:focus {
+    border-color: var(--primary-color);
+    outline: none;
+    box-shadow: 0 0 0 2px var(--selected-shadow);
+}
+
+.homepage-btn {
+    padding: 10px 20px;
+    background-color: var(--primary-color);
+    color: var(--card-title-color);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+.homepage-btn:disabled {
+    background-color: var(--disabled-bg);
+    color: var(--disabled-text);
+    cursor: not-allowed;
+}

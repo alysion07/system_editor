@@ -1,9 +1,6 @@
 /* MARS 열구조체 입력 인터페이스 스타일시트 */
 
 .heat-structure {
-    --primary-color: #3498db;
-    --secondary-color: #2980b9;
-    --background-color: #f5f5f5;
     --panel-color: #ffffff;
     --border-color: #dddddd;
     --success-color: #2ecc71;
@@ -18,7 +15,7 @@
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 0;
     padding: 0;
-    background-color: var(--background-color);
+    background-color: #f5f5f5;
     color: var(--text-color);
 }
 
