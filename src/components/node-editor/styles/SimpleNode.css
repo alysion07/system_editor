@@ -1,33 +1,50 @@
+/* === Glassmorphism Simple Node === */
 
-.simple-node-body{
-    border-radius: 3px;
-    border: 1px solid #666666;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-    font-family: 'pretendard';
-    font-size: 50px;
+.simple-node-body {
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center; /* Center the icon */
     flex-direction: column;
-    padding: 4px;
-    width: 50px;
-    height: 50px;
-    flex: 1 1 auto;
-    overflow: hidden;
+    padding: 8px;
+    width: 64px; /* Slightly larger for better visibility */
+    height: 64px;
+    background-color: rgba(44, 49, 58, 0.7);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transition: all 0.2s ease-out;
 }
+
+.simple-node-body:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+    background-color: var(--hover-background);
+    border-color: var(--primary-color);
+}
+
 .simple-node-body img {
     display: block;
-    margin: auto;
-    max-width: 100%;
-    max-height: 100%;
+    width: 70%; /* Adjust icon size */
+    height: 70%;
     object-fit: contain;
+    filter: drop-shadow(0 2px 3px rgba(0,0,0,0.5)); /* Add a subtle shadow to the icon */
 }
 
 .simple-node-footer {
     display: flex;
-    min-height: 12px;
+    min-height: 16px;
     align-items: center;
     justify-content: center;
-    font-size: 10px;
-    color: #222222;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-color);
+    margin-top: 4px;
+}
+
+/* Selection style for simple node */
+.react-flow__node.selected .simple-node-body {
+    border-color: var(--selected-border);
+    box-shadow: 0 0 15px var(--selected-shadow), 0 0 0 2px var(--selected-border);
 }

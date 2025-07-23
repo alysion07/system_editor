@@ -26,3 +26,22 @@ body {
     background-color: var(--background-color);
     color: var(--text-color);
 }
+/* 다크테마 스크롤바 */
+::-webkit-scrollbar {
+    width: 10px;
+    background: #23272f;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #444a58;
+    border-radius: 8px;
+    border: 2px solid #23272f;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #5a6170;
+}
+
+::-webkit-scrollbar-corner {
+    background: #23272f;
+}

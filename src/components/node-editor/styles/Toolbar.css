@@ -1,60 +1,71 @@
+/* === Glassmorphism Toolbar === */
 
-/* styles/Toolbar.css */
 .editor-toolbar {
     display: flex;
     align-items: center;
-    height: 36px;
+    height: 48px; /* Increased height for better touch targets and visual balance */
     width: auto;
-    background-color: #f8f9fa;
-    border-bottom: 1px solid #ddd;
-    padding: 0 10px;
+    background-color: rgba(34, 37, 42, 0.6); /* Semi-transparent background */
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border-color);
+    padding: 0 12px;
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     z-index: 10;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
 
 .toolbar-group {
     display: flex;
-    margin-right: 5px;
+    align-items: center;
+    gap: 4px; /* Spacing between buttons in a group */
+    margin-right: 8px;
 }
 
 .toolbar-button {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 28px;
-    height: 28px;
+    width: 36px;
+    height: 36px;
     border: none;
     background-color: transparent;
-    border-radius: 4px;
-    margin: 0 2px;
+    border-radius: 6px; /* Softer corners */
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: all 0.2s ease-out;
+    color: var(--light-text-color);
+    padding: 0px 20px
 }
 
 .toolbar-button:hover {
-    background-color: #ececec;
+    background-color: var(--hover-background);
+    color: var(--text-color);
+    transform: translateY(-1px);
 }
 
 .toolbar-button:disabled {
-    opacity: 0.5;
+    opacity: 0.4;
     cursor: not-allowed;
+    transform: none;
+    background-color: transparent;
 }
 
 .toolbar-divider {
     width: 1px;
-    height: 20px;
-    background-color: #ddd;
-    margin: 0 8px;
+    height: 24px;
+    background-color: var(--border-color);
+    margin: 0 10px;
 }
 
-/* Font Awesome 사용하지 않는 경우 대체 텍스트 스타일 */
 .toolbar-button i {
-    font-size: 14px;
+    font-size: 16px; /* Slightly larger icons */
 }
+
 .toolbar-right {
-    margin-left: auto; /* 이 속성이 오른쪽으로 밀어냄 */
+    margin-left: auto;
+    display: flex;
+    align-items: center;
 }

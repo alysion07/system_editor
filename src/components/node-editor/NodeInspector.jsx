@@ -324,14 +324,16 @@ const NodeInspector = ({ selectedNode, componentTypes, onPropertyChange }) => {
 
         return (
             <div key={field.id} className="field-container">
-                <label htmlFor={field.id} className="field-label">
-                    {field.label}
-                    {field.required && <span className="required-marker">*</span>}
-                </label>
+                <div>
+                    <label htmlFor={field.id} className="field-label">
+                        {field.label}
+                        {field.required && <span className="required-marker">*</span>}
+                    </label>
 
-                <div className="field-input-container">
-                    {inputElement}
-                    {field.unit && <span className="field-unit">{field.unit}</span>}
+                    <div className="field-input-container">
+                        {inputElement}
+                        {field.unit && <span className="field-unit">{field.unit}</span>}
+                    </div>
                 </div>
 
                 {field.description && (

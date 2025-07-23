@@ -1,127 +1,139 @@
+/* === Glassmorphism Node Design === */
+
+/* --- Base Node Style --- */
 .node {
-    border-bottom-left-radius: 4px;
-    border-bottom-right-radius: 4px;
-    background-color: #f0f9ff;
-    /*border: 1px solid #9ecaed;*/
+    border-radius: 10px;
+    /* Use a semi-transparent version of the panel background for the glass effect */
+    background-color: rgba(34, 37, 42, 0.75); 
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px); /* Safari support */
+    
+    /* The top border will be colored based on node type */
+    border: 1px solid var(--border-color);
+
     min-height: 60px;
-    min-width: 90px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-    font-family: 'pretendard';
-    font-size: 11px;
-    color: #666;
-
-
+    min-width: 140px;
+    
+    /* A deeper shadow for a floating effect */
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    
+    font-family: 'Pretendard', sans-serif;
+    font-size: 12px;
+    color: var(--text-color);
+    transition: all 0.2s ease-in-out;
+    /* overflow: hidden; */ /* This was causing the handles to be clipped */
 }
 
+.node:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+    background-color: rgba(40, 48, 64, 0.85); /* Lighten on hover */
+}
+
+/* --- Node Header --- */
 .node-header {
     display: flex;
     align-items: center;
-    /*flex-direction: row;*/
-    /*justify-content:  space-between;*/
-    padding: 4px 12px;
-    border-top-left-radius: 4px;
-    border-top-right-radius: 4px;
-    background-color: #2c3e50;
-    color: white;
-    gap: 5px;
+    justify-content: space-between;
+    padding: 8px 12px;
+    color: var(--card-title-color);
+    font-weight: 600;
 }
+
 .node-delete-btn {
-    width: 8px;
-    height: 8px;
+    width: 20px;
+    height: 20px;
     display: flex;
     align-items: center;
+    justify-content: center;
     background: none;
     border: none;
-    color: white;
+    color: var(--light-text-color);
     font-size: 16px;
     cursor: pointer;
     opacity: 0.7;
-    transition: opacity 0.2s;
+    transition: all 0.2s;
+    border-radius: 5px;
 }
+
+.node-delete-btn:hover {
+    color: var(--danger-color);
+    background-color: rgba(239, 83, 80, 0.2);
+    opacity: 1;
+}
+
+/* --- Node Body --- */
 .node-body {
-    padding: 8px;
-    align-items: center;
+    padding: 12px;
 }
+
 .node-content {
     display: flex;
     flex-direction: column;
-    gap: 5px;
-    max-height: 150px;    /* 최대 높이 지정 */
-    overflow-y: auto;     /* 세로 스크롤 활성화 */
+    gap: 8px;
+    max-height: 150px;
+    overflow-y: auto;
     overflow-x: hidden;
 }
 
-.node-label {
-    font-weight: bold;
+.position-node-label {
+    font-weight: 500;
+    border-radius: 15px;
+    padding: 2px 10px;
 }
 
-/* Node type-specific styles */
-.node-header-SNGLVOL {
-    border-color: #76c2f6;
+/* --- Node Type Colors: Applied to the header background --- */
+.node-header-SNGLVOL .position-node-label { background-color: #3498db; }
+.node-header-TMDPJUN .position-node-label { background-color: #2ecc71; }
+.node-header-TMDPVOL .position-node-label { background-color: #1abc9c; }
+.node-header-HTSTR .position-node-label { background-color: #e74c3c; }
+.node-header-reactor_core .position-node-label { background-color: #9b59b6; }
+.node-header-heat_exchanger .position-node-label { background-color: #f1c40f; }
+.node-header-pressurizer .position-node-label { background-color: #e67e22; }
+.node-header-PIPE .position-node-label { background-color: #7f8c8d; }
+.node-header-PUMP .position-node-label { background-color: #d35400; }
+
+
+/* --- Selection Style: A glowing effect --- */
+.react-flow__node.selected .node {
+    border-color: var(--selected-border);
+    box-shadow: 0 0 20px var(--selected-shadow), 0 0 0 2px var(--selected-border);
 }
 
-.node-header-SNGLVOL .node-header {
-    background-color: #76c2f6;
-}
-.node-header-TMDPJUN {
-    border-color: #3498db;
-}
-
-.node-header-TMDPJUN .node-header {
-    background-color: #3498db;
-}
-
-.node-header-TMDPVOL {
-    border-color: #2ecc71;
+/* --- Node Connection Handles (Ports) --- */
+.react-flow__handle {
+    width: 12px;
+    height: 12px;
+    background-color: var(--border-color);
+    border: 2px solid var(--card-background);
+    border-radius: 50%;
+    transition: all 0.15s ease-out; /* Add a smooth transition */
+    transform-origin: center; /* Explicitly set the origin */
 }
 
-.node-header-TMDPVOL .node-header {
-    background-color: #2ecc71;
+.react-flow__handle:hover {
+    background-color: var(--primary-color);
+    border-color: var(--text-color);
+    box-shadow: 0 0 10px var(--primary-color);
 }
 
-.node-header-HTSTR {
-    border-color: #e74c3c;
+.react-flow__handle.connecting {
+    background-color: var(--success-color);
+    animation: pulse 1.5s infinite;
 }
 
-.node-header-HTSTR .node-header {
-    background-color: #e74c3c;
+.react-flow__handle.valid {
+    background-color: var(--success-color);
 }
 
-.node-header-reactor_core {
-    border-color: #9b59b6;
-}
-
-.node-header-reactor_core .node-header {
-    background-color: #9b59b6;
-}
-
-.node-header-heat_exchanger {
-    border-color: #f39c12;
-}
-
-.node-header-heat_exchanger .node-header {
-    background-color: #f39c12;
-}
-
-.node-header-pressurizer {
-    border-color: #16a085;
-}
-
-.node-header-pressurizer .node-header {
-    background-color: #16a085;
-}
-.node-header-PIPE {
-    border-color: #6c7d8a;
-}
-
-.node-header-PIPE .node-header {
-    background-color: #6c7d8a;
-}
-
-.node-header-PUMP {
-    border-color: #9a3ce7;
-}
-
-.node-header-PUMP .node-header {
-    background-color: #9a3ce7;
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(38, 198, 218, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 12px rgba(38, 198, 218, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(38, 198, 218, 0);
+    }
 }

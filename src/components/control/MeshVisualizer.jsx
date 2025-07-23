@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
-import './../../styles/MeshVisualizer.css';
+import 'src/components/node-editor/styles/MeshVisualizer.css';
 
 /**
  * 열구조체의 메시 구조를 시각화하는 컴포넌트

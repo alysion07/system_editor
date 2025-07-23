@@ -61,19 +61,25 @@ const NodeEditor = () => {
         if (!userId || !projectName) return;
 
         let cancelled = false;
+        let isLoded = false;
 
         const load = async () => {
+
+            if(isLoded) return;
+
             setLoading(true);
             try {
                 const existing = await ProjectService.listProjects(userId);
-
                 // ✅ 실제로 존재하는 경우만 로딩
                 if (!existing.includes(projectName)) return;
 
                 const json = await ProjectService.loadProjectJson(userId, projectName);
                 FileLoader.validateFlowData(json);
+
                 if (!cancelled) {
                     flowStore.importFlow(json);
+                    isLoded = true;
+
                     setTimeout(() => {
                         reactFlowInstance?.fitView({ padding: 0.1 });
                     }, 50);
@@ -92,7 +98,14 @@ const NodeEditor = () => {
         return () => {
             cancelled = true;
         };
-    }, [userId, projectName, setLoading, flowStore, reactFlowInstance]);
+    }, [userId, projectName]);
+
+    // fitView를 위한 별도 useEffect
+    useEffect(() => {
+        if (reactFlowInstance && nodes.length > 0) {
+            reactFlowInstance.fitView({ padding: 0.1 });
+        }
+    }, [reactFlowInstance, nodes.length]);
 
 
     useEffect(() => {

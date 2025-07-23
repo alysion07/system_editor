@@ -88,7 +88,7 @@ const Dashboard = () => {
         if (!window.confirm(`프로젝트 "${projectName}"을(를) 정말 삭제하시겠습니까?`)) return;
         try {
             // userId/projectName/ 하위 전체 삭제
-            await ProjectService.deleteProject(userId, `${userId}/${projectName}/`);
+            await ProjectService.deleteProject(userId, projectName);
             await fetchProjects();               // 리스트 갱신
             if (selectedProject === projectName) setSelectedProject(null);
         } catch (err) {
@@ -98,19 +98,19 @@ const Dashboard = () => {
     };
 
     return (
-        <div className="p-6 space-y-6 bg-gray-900 min-h-screen">
+        <div className="p-8 space-y-8 bg-background-color min-h-screen font-sans">
             <header className="flex items-center justify-between">
                 <h1 className="text-3xl font-bold text-gray-100">{userId} 프로젝트 관리</h1>
                 <div className="space-x-2">
                     <button
                         onClick={handleNew}
-                        className="bg-blue-700 text-white px-4 py-2 rounded-xl shadow"
+                        className="bg-primary-color text-white px-5 py-2.5 rounded-lg shadow-lg hover:bg-opacity-80 transition-all duration-300 font-semibold"
                     >
                         + 새 프로젝트 생성
                     </button>
                     <button
                         onClick={() => setUploadOpen(true)}
-                        className="bg-teal-600 text-white px-4 py-2 rounded-xl shadow"
+                        className="bg-success-color text-white px-5 py-2.5 rounded-lg shadow-lg hover:bg-opacity-80 transition-all duration-300 font-semibold"
                     >
                         프로젝트 업로드
                     </button>
@@ -130,7 +130,6 @@ const Dashboard = () => {
                                 count={p.count}
                                 onClick={
                                     () => {
-                                        console.log('버튼 클릭됨', p.name)
                                         setSelectedProject(p.name)
                                     }
                                 }
