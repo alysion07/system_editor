@@ -41,7 +41,7 @@ const TaskManager = forwardRef((props, ref) => {
             if (!isTaskStarted.current) {
                 isTaskStarted.current = true;
                 console.log(" useEffect start",isTaskCompleted);
-                // startTask(uploadArgs)
+                startTask(uploadArgs)
             }
         }
     }, [uploadArgs]);

@@ -22,7 +22,7 @@
 .heat-structure .tabs {
     display: flex;
     background-color: rgba(34, 37, 42, 0.6);
-    font-size: 14px;
+    font-size: 10px;
 }
 
 .heat-structure .tab {
@@ -64,7 +64,6 @@
 
 .heat-structure .section-title {
     font-size: 1rem;
-    margin-bottom: 20px;
     color: var(--primary-color);
     border-bottom: 1px solid var(--border-color);
     padding-bottom: 10px;
@@ -79,6 +78,7 @@
     border-width: 0 0 0 4px;
     border-style: solid;
     background-color: rgba(10,10,15,0.5);
+    font-size: 12px;
 }
 
 .heat-structure .info-box { border-color: var(--primary-color); }
