@@ -6,7 +6,10 @@ const useProjectStore = create(set => ({
     projectName: null,
     loading: false,
 
-    setUserId: (userId) => set({ userId }),
+    setUserId: (userId) => {
+        set({ userId })
+        console.log("userid: ", userId)
+    },
     setProjectName: (projectName) => set({ projectName }),
     setLoading: (loading) => set({ loading }),
 

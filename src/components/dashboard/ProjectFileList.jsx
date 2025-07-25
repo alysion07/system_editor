@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { ProjectService } from '../../services/projectService';
 import { FaFileAlt, FaDownload, FaEdit } from 'react-icons/fa';
 
-const ProjectFileList = ({ bucket, userId, projectName, onReadyToEdit }) => {
+const ProjectFileList = ({ bucket, userId, projectName, onReadyToEdit, onFileClick }) => {
     const [files, setFiles] = useState([]);
     const [hasRun, setHasRun] = useState(false);
     const [selected, setSelected] = useState('');
@@ -38,7 +38,13 @@ const ProjectFileList = ({ bucket, userId, projectName, onReadyToEdit }) => {
         return (
             <li
                 key={path}
-                onClick={() => setSelected(path)}
+                onClick={() => {
+                    setSelected(path)
+                    console.log("ProjectFileList - onClick  ", path , path, output, onFileClick)
+                    if (output && onFileClick) {
+                        onFileClick({ name, path, userId, projectName });
+                    }
+                }}
                 className={`flex items-center justify-between px-4 py-3 rounded-lg cursor-pointer transition-all duration-200
           ${isSel ? 'bg-primary-color/80 text-white shadow-md' : 'hover:bg-hover-background text-light-text-color'}`}
             >
@@ -56,7 +62,7 @@ const ProjectFileList = ({ bucket, userId, projectName, onReadyToEdit }) => {
     };
 
     return (
-        <div className="border border-border-color rounded-2xl p-8 mt-6 bg-card-background/70 backdrop-blur-md shadow-xl">
+        <div className="h-full border border-border-color rounded-2xl p-8 bg-panel-bg/85 backdrop-blur-md shadow-xl overflow-auto">
             <h3 className="text-2xl font-bold mb-6 text-card-title-color">📁 {projectName} 파일 목록</h3>
 
             {inputs.length > 0 && (
@@ -73,20 +79,22 @@ const ProjectFileList = ({ bucket, userId, projectName, onReadyToEdit }) => {
                 </div>
             )}
 
-            <div className="text-right mt-6">
-                <button
-                    onClick={() => {
-                        onReadyToEdit({
-                            userId,
-                            projectName,
-                        });
-                    }}
-                    className="inline-flex items-center space-x-2 bg-primary-color text-white px-6 py-3 rounded-xl hover:bg-opacity-80 transition-all duration-300 font-semibold shadow-lg"
-                >
-                    <FaEdit />
-                    <span>편집 시작</span>
-                </button>
-            </div>
+            {onReadyToEdit && (
+                <div className="text-right mt-6">
+                    <button
+                        onClick={() => {
+                            onReadyToEdit({
+                                userId,
+                                projectName,
+                            });
+                        }}
+                        className="inline-flex items-center space-x-2 bg-primary-color text-white px-6 py-3 rounded-xl hover:bg-opacity-80 transition-all duration-300 font-semibold shadow-lg"
+                    >
+                        <FaEdit />
+                        <span>편집 시작</span>
+                    </button>
+                </div>
+            )}
         </div>
     );
 };

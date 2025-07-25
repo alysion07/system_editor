@@ -351,7 +351,6 @@ const NodeEditor = () => {
                             canRedo={flowStore.canRedo}
                             onExport={handleExport}
                             onGeneralSetting={onGenSettings}
-                            projectName={projectName}
                             onProjectNameChange={setProjectName}
                             onSave={handleSave}
                             onSimplify={handleSimplify}

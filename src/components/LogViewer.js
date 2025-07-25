@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
+
 /**
  * 로그 출력 컴포넌트: 한 줄씩 전달된 텍스트를 화면에 표시
  */
@@ -21,18 +22,11 @@ export function LiveLogViewer({ incomingLine }) {
     return (
         <div
             ref={containerRef}
-            style={{
-                height: '200px',
-                overflowY: 'auto',
-                background: '#f9f9f9',
-                padding: '8px',
-                border: '1px solid #ccc',
-                fontFamily: 'monospace',
-                fontSize: '12px'
-            }}
+            className="w-full h-full bg-gray-900/70 rounded-md p-4 overflow-y-auto font-mono text-sm text-gray-300 a
+            border border-gray-700"
         >
             {logs.map((line, idx) => (
-                <div key={idx}>{line}</div>
+                <div key={idx} className="whitespace-pre-wrap">{line}</div>
             ))}
         </div>
     );

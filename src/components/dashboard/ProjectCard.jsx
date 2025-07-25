@@ -2,10 +2,14 @@
 import React from 'react';
 import { FaTrash } from 'react-icons/fa';
 
-const ProjectCard = ({ name, count, onClick, onDelete }) => (
+const ProjectCard
+    = ({ name, count, onClick, onDelete, selected }) => (
     <div
         onClick={onClick}
-        className="p-6 rounded-xl shadow-lg border border-border-color bg-card-background/70 backdrop-blur-md hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 cursor-pointer group"
+        className={
+            `p-6 rounded-xl shadow-lg bg-panel-bg/85 backdrop-blur-md hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 cursor-pointer group
+            ${selected ? 'ring-2 ring-primary-color shadow-selected scale-105 z-10' : ''}`
+        }
     >
         <h3 className="text-xl font-bold mb-2 text-card-title-color">{name}</h3>
         <p className="text-sm text-light-text-color mb-4">파일 수: {count}</p>

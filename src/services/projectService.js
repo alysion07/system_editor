@@ -108,6 +108,19 @@ export const ProjectService = {
         await minioClient.send(cmd);
     },
 
+    // 일반 파일 업로드 (.i 등)
+    async uploadProjectFile(userId, projectName, file) {
+        const objectKey = `${userId}/${projectName}/${file.name}`;
+        const cmd = new PutObjectCommand({
+            Bucket: BUCKET_NAME,
+            Key: objectKey,
+            Body: file,
+            ContentType: file.type || 'application/octet-stream'
+        });
+        await minioClient.send(cmd);
+        return true; // 성공 시 true 반환
+    },
+
     /**
      * 프로젝트 전체 삭제 (폴더 단위)
      * @param {string} userId

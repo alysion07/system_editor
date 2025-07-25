@@ -5,8 +5,8 @@ import * as taskManagerService from '../services/taskManagerService';
 import LiveFileChart from './LiveFileChart';
 import {LiveLogViewer} from "./LogViewer";
 import MinioManager from "./MinIOTester";
-import './TaskManager.css'
 import { ProjectService } from '../services/projectService';
+import ProjectViewer from "./project-viewer/ProjectViewer";
 
 //v-smr,user1/project1,plotfl
 
@@ -41,7 +41,7 @@ const TaskManager = forwardRef((props, ref) => {
             if (!isTaskStarted.current) {
                 isTaskStarted.current = true;
                 console.log(" useEffect start",isTaskCompleted);
-                startTask(uploadArgs)
+                // startTask(uploadArgs)
             }
         }
     }, [uploadArgs]);
@@ -115,63 +115,6 @@ const TaskManager = forwardRef((props, ref) => {
     useImperativeHandle(ref, () => ({
         handleStartTask: startTask  // 외부로 이 함수를 노출!
     }))
-/*
-    // 수동으로 로그 가져오기
-    const handleGetScreenLog = async () => {
-        if (!taskId) return;
-
-        setIsLoading(true);
-        try {
-            const log = await taskManagerService.getScreenLog(taskId);
-            if (log) {
-                setScreenLogs(prev => [...prev, log]);
-            }
-        } catch (err) {
-            setError(`Error getting screen log: ${err.message}`);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const handleGetPlotLog = async () => {
-        if (!taskId) return;
-
-        setIsLoading(true);
-        try {
-            const log = await taskManagerService.getPlotLog(taskId);
-            if (log) {
-                setPlotLogs(prev => [...prev, log]);
-            }
-        } catch (err) {
-            setError(`Error getting plot log: ${err.message}`);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-    const HandleStartTask = async () => {
-       if(args)
-           startTask(args)
-
-    }
-
-    const fetchFiles = async (bucketName) => {
-        try {
-            const fileList = await ProjectService.listProjects();
-            setFiles(fileList);
-        } catch (error) {
-            console.error('파일 가져오기 실패:', error);
-        }
-    };
-    */
-    const handleDownload = async (fileName) => {
-        try {
-            const url = await ProjectService.getSignedDownloadUrl(fileName);
-            window.open(url, '_blank');
-        } catch (error) {
-            console.error('다운로드 URL 생성 실패:', error);
-        }
-    };
-
 
     const getProjectName = (args) => {
         if (!args) return '';
@@ -180,85 +123,57 @@ const TaskManager = forwardRef((props, ref) => {
     };
 
     return (
-        <div className="task-manager">
-            <div className={'task-manager-header'}>
+        <div className="min-h-screen bg-background-color text-text-color font-sans p-4 flex flex-col gap-4">
+            {/* Header */}
+            <div className="flex items-center justify-between bg-gray-800/60 backdrop-blur-md rounded-lg p-3 border border-gray-700 shadow-lg">
                 <button
                     onClick={() => navigate('/nodeeditor')}
+                    className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-700 transition-colors"
+                    title="Back to Editor"
                 >
-                    <i className="fas fa-arrow-left"></i>
+                    <i className="fas fa-arrow-left text-gray-300"></i>
                 </button>
-                <div className='task-manager-title'>
-                    <h2>Simulation Manager</h2>
-                </div>
+                <h1 className="text-xl font-bold text-primary-color">Simulation Manager</h1>
+                <div className="w-10"></div> {/* Spacer */}
             </div>
 
-            {error && <div className="error-message">{error}</div>}
-            {isTaskCompleted && (
-                <div className="task-completed">
-                    <h2 className="custom-title"> '{getProjectName(uploadArgs)}' has been completed</h2>
-                    // TODO Minio 관련 처리 필요
-                    {/*<MinioManager isTaskComplete={useStreaming}*/}
-                    {/*               projectFolderPath={uploadArgs}*/}
-                    {/*/>*/}
+            {error && (
+                <div className="bg-red-500/20 border border-red-500 text-red-300 px-4 py-3 rounded-lg" role="alert">
+                    <strong className="font-bold">Error:</strong>
+                    <span className="block sm:inline ml-2">{error}</span>
                 </div>
-
             )}
-            <div className={`task-manager-container ${taskId}`}>
-                <h4>Plot Chart</h4>
-                <LiveFileChart incomingLine={currentLine}/>
+
+            {/* Main Content Layout */}
+            <div className="flex flex-col gap-4">
+                {/* 1. File Viewer */}
+                {isTaskCompleted && (
+                    <div className="bg-gray-800/60 backdrop-blur-md rounded-lg shadow-lg border border-gray-700 p-4 flex flex-col h-[75vh]">
+                        <h2 className="text-lg font-semibold text-gray-100 mb-3">
+                            '{getProjectName(uploadArgs) || "Project"}' Results
+                        </h2>
+                        <div className="flex-1 min-h-0">
+                            <ProjectViewer bucketName={"v-smr"}/>
+                        </div>
+                    </div>
+                )}
+
+                {/* 2. Plot Chart */}
+                <div className="bg-gray-800/60 backdrop-blur-md rounded-lg shadow-lg border border-gray-700 p-4 flex flex-col h-1/2">
+                    <h4 className="text-lg font-semibold text-primary-color mb-3">Plot Chart</h4>
+                    <div className="flex-1 relative min-h-0">
+                        <LiveFileChart incomingLine={currentLine}/>
+                    </div>
+                </div>
+
+                {/* 3. Screen Log */}
+                <div className="bg-gray-800/60 backdrop-blur-md rounded-lg shadow-lg border border-gray-700 p-4 flex flex-col h-96">
+                    <h4 className="text-lg font-semibold text-primary-color mb-3">Screen Log</h4>
+                    <div className="flex-1 overflow-y-auto min-h-0">
+                        <LiveLogViewer incomingLine={LogLine}/>
+                    </div>
+                </div>
             </div>
-            <div className ="screen-logs">
-                <h4> Screen Log</h4>
-                <LiveLogViewer incomingLine={LogLine}/>
-            </div>
-
-            {/*<div className="task-controls">*/}
-            {/*    <div className="input-group">*/}
-            {/*        <label htmlFor="args">Task Arguments (comma-separated):</label>*/}
-            {/*        <input*/}
-            {/*            id="args"*/}
-            {/*            type="text"*/}
-            {/*            value={args}*/}
-            {/*            onChange={(e) => setArgs(e.target.value)}*/}
-            {/*            placeholder="arg1, arg2, arg3"*/}
-            {/*        />*/}
-            {/*    </div>*/}
-            {/*    */}
-            {/*    <div className="mode-selector">*/}
-            {/*        <label>*/}
-            {/*            <input*/}
-            {/*                type="checkbox"*/}
-            {/*                checked={useStreaming}*/}
-            {/*                onChange={(e) => setUseStreaming(e.target.checked)}*/}
-            {/*            />*/}
-            {/*            Use Streaming Mode*/}
-            {/*        </label>*/}
-            {/*    </div>*/}
-
-            {/*    <div className="button-group">*/}
-            {/*        <button*/}
-            {/*            onClick={HandleStartTask}*/}
-            {/*            disabled={isLoading || !args.trim()}*/}
-            {/*        >*/}
-            {/*            Start Simulation*/}
-            {/*        </button>*/}
-            {/*        <>*/}
-            {/*            <button*/}
-            {/*                onClick={handleGetScreenLog}*/}
-            {/*                disabled={isLoading}*/}
-            {/*            >*/}
-            {/*                Get Screen Log Manually*/}
-            {/*            </button>*/}
-
-            {/*            <button*/}
-            {/*                onClick={handleGetPlotLog}*/}
-            {/*                disabled={isLoading}*/}
-            {/*            >*/}
-            {/*                Get Plot Log Manually*/}
-            {/*            </button>*/}
-            {/*        </>*/}
-            {/*    </div>*/}
-            {/*</div>*/}
         </div>
     );
 });

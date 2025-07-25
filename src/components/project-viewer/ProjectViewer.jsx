@@ -1,90 +1,54 @@
-// Dashboard.jsx
 import React, { useEffect, useState } from 'react';
-import {useLocation, useNavigate} from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import { ProjectService } from '../../services/projectService.js';
-import Browser from './Browser';
-import './ProjectViewer.css';
-
+import FilePreview from './FilePreview';
+import useProjectStore from '../store/projectStore';
+import ProjectFileList from "../dashboard/ProjectFileList";
 
 
 const ProjectViewer = ({ bucketName }) => {
-    const [projects, setProjects] = useState([]);
     const [selectedProject, setSelectedProject] = useState(null);
-    const [loading, setLoading] = useState(true);
-
-    const location = useLocation();
-    const navigate = useNavigate();
-    const { user , previousPage , timestamp  } = location.state || {};
+    const [selectedObjectKey, setSelectedObjectKey] = useState(null);
+    const { userId, projectName } = useProjectStore();
 
     useEffect(() => {
-        if (!bucketName) return;
-        fetchProjects();
-    }, [bucketName]);
+        setSelectedProject(projectName);
+        console.log("call effect projectName: ", projectName);
+    }, [ projectName]);
 
-    const fetchProjects = async () => {
-        try {
-            setLoading(true);
-            const prefix = `${user}/`;
-            const files = await ProjectService.listProjects(prefix);
 
-            const uniqueProjects = new Set();
-
-            files.forEach(path => {
-                if (typeof path === 'string') {
-                    const segments = path.split('/');
-                    if (segments.length >= 2 && segments[0] === user) {
-                        uniqueProjects.add(segments[1]);
-                    }
-                } else if (path.Key || path.Prefix) {
-                    const raw = path.Key || path.Prefix;
-                    const segments = raw.split('/');
-                    if (segments.length >= 2 && segments[0] === user) {
-                        uniqueProjects.add(segments[1]);
-                    }
-                }
-            });
-
-            setProjects([...uniqueProjects]);
-        } catch (err) {
-            console.error('프로젝트 목록 불러오기 실패:', err);
-        } finally {
-            setLoading(false);
-        }
+    // 파일 선택 핸들러
+    const handleFileSelect = (objectKey) => {
+        setSelectedObjectKey(objectKey);
+        console.log("call handleFileSelect ", objectKey)
     };
 
-    const buildKeyPrefix = (user, projectName) => `${user}/${projectName}/`;
+
+    useEffect(() => {
+        console.log("call effect selectedProject: ", selectedProject);
+        
+    }, [selectedProject, setSelectedProject]);
 
     return (
-        <div className="project-viewer-wrapper">
-            <h2 className="project-viewer-title">🗂 {user}의 프로젝트</h2>
-
-            {loading ? (
-                <div>로딩 중...</div>
-            ) : (
-                <div className="project-grid">
-                    {projects.map(project => (
-                        <div
-                            key={project}
-                            className={`project-card ${project === selectedProject ? 'selected' : ''}`}
-                            onClick={() => setSelectedProject(project)}
-                        >
-                            <div className="project-title">{project}</div>
-                        </div>
-                    ))}
+        <div className="project-viewer-wrapper h-full flex flex-col">
+            <div className="flex flex-row gap-4 flex-1 min-h-0">
+                <div className="basis-1/4 flex-shrink-0">
+                <ProjectFileList
+                    bucket={bucketName}
+                    userId={userId}
+                    projectName={projectName}
+                    onFileClick={handleFileSelect} // 파일 선택 시 오브젝트키 전달
+                />
                 </div>
-            )}
 
-            {selectedProject && (
-                <div className="browser-section">
-                    <Browser
-                        key={selectedProject}
-                        externalBucket={bucketName}
-                        externalPrefix={buildKeyPrefix(user, selectedProject)}
-                        buildFullKey={(relativePath) => buildKeyPrefix(user, selectedProject) + relativePath}
+                <div className="browser-section  basis-3/4 flex-shrink-0 pr-4">
+                    <FilePreview
+                        objectKey={selectedObjectKey}
+                        buildFullKey={key => key} // 필요시 함수 전달
                     />
                 </div>
-            )}
+            </div>
         </div>
     );
 };

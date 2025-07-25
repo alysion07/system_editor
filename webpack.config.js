@@ -3,6 +3,9 @@ const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const webpack = require('webpack');
 
+const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
+const isDev = process.env.NODE_ENV !== 'production';
+
 module.exports = {
     mode: 'development',
     entry: './src/index.js',
@@ -72,17 +75,21 @@ module.exports = {
             'process/browser': require.resolve('process/browser')
         }
     },
+
     plugins: [
         new HtmlWebpackPlugin({ template: './public/index.html' }),
         new webpack.ProvidePlugin({
             Buffer: ['buffer', 'Buffer'],
             process: 'process/browser',
         }),
-    ],
+        isDev && new ReactRefreshWebpackPlugin(),  // ✅ 추가
+    ].filter(Boolean),
+
     devServer: {
         static: { directory: path.join(__dirname, 'public') },
         port: 3000,
         hot: true,
+        liveReload: false,       // HMR 우선 사용
         historyApiFallback: true
     },
 };

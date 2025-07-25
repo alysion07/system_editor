@@ -1,11 +1,15 @@
 // src/components/Dashboard/Dashboard.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { FiLogOut } from 'react-icons/fi';
 
 import { ProjectService  } from '../../services/projectService.js';
 import UploadModal from './UploadModal';
 import ProjectCard from './ProjectCard';
 import ProjectFileList from './ProjectFileList.jsx';
+
+import useProjectStore from '../store/projectStore';
+import useFlowStore from '../store/useFlowStore';
 
 const Dashboard = () => {
     const [uploadOpen, setUploadOpen] = useState(false);
@@ -57,6 +61,21 @@ const Dashboard = () => {
         });
     };
 
+    const handleLogout = () => {
+        useProjectStore.getState().reset(); // 프로젝트 관련 상태 초기화
+        useFlowStore.setState({
+            past: [],
+            present: { nodes: [], edges: [] },
+            future: [],
+            selectedNodeId: null,
+            canUndo: false,
+            canRedo: false,
+            dragStartNodes: null,
+        }); // 다이어그램 상태 초기화
+
+        navigate('/'); // 로그인 페이지로 이동
+    };
+
     const handleUpload = async (file) => {
 
         try {
@@ -100,27 +119,33 @@ const Dashboard = () => {
     return (
         <div className="p-8 space-y-8 bg-background-color min-h-screen font-sans">
             <header className="flex items-center justify-between">
-                <h1 className="text-3xl font-bold text-gray-100">{userId} 프로젝트 관리</h1>
-                <div className="space-x-2">
+                <div className="flex items-center gap-4">
+                    <h1 className="text-3xl font-bold text-gray-100">{userId} 프로젝트 관리</h1>
                     <button
                         onClick={handleNew}
                         className="bg-primary-color text-white px-5 py-2.5 rounded-lg shadow-lg hover:bg-opacity-80 transition-all duration-300 font-semibold"
                     >
                         + 새 프로젝트 생성
                     </button>
-                    <button
-                        onClick={() => setUploadOpen(true)}
-                        className="bg-success-color text-white px-5 py-2.5 rounded-lg shadow-lg hover:bg-opacity-80 transition-all duration-300 font-semibold"
-                    >
-                        프로젝트 업로드
-                    </button>
                 </div>
+                <button
+                    onClick={handleLogout}
+                    className="bg-primary-color text-white px-5 py-2.5 rounded-lg shadow-lg hover:bg-opacity-80 transition-all duration-300 font-semibold"
+                >
+                    <FiLogOut size={20} />
+                </button>
             </header>
+                    {/*<button*/}
+                    {/*    onClick={() => setUploadOpen(true)}*/}
+                    {/*    className="bg-success-color text-white px-5 py-2.5 rounded-lg shadow-lg hover:bg-opacity-80 transition-all duration-300 font-semibold"*/}
+                    {/*>*/}
+                    {/*    프로젝트 업로드*/}
+                    {/*</button>*/}
 
             <section>
-                <h2 className="text-xl font-semibold mb-2 text-gray-200">내 프로젝트</h2>
+                <h2 className="text-xl font-semibold mb-2 text-gray-200">최근 프로젝트</h2>
                 {projects.length === 0 ? (
-                    <p className="text-gray-400">등록된 프로젝트가 없습니다.</p>
+                    <p className="text-light-text-color text-lg">등록된 프로젝트가 없습니다.</p>
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                         {projects.map(p => (
@@ -134,6 +159,7 @@ const Dashboard = () => {
                                     }
                                 }
                                 onDelete={handleDeleteProject}
+                                selected={selectedProject === p.name}
                             />
                         ))}
                     </div>

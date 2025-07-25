@@ -74,38 +74,53 @@ export default function LiveFileChart({ incomingLine }) {
     }, [incomingLine]);
 
     const getOption = groupName => ({
-        tooltip: { trigger: 'axis' },
-        legend: { data: groups[groupName] },
-        xAxis: { type: 'value', name: 'time (s)' },
-        yAxis: { type: 'value' },
+        backgroundColor: '#22252a',
+        tooltip: {
+            trigger: 'axis',
+            textStyle: { color: '#b0b8c1' } // 툴팁 텍스트 색상
+        },
+        legend: {
+            data: groups[groupName],
+            textStyle: { color: '#b0b8c1' } // 범례 텍스트 색상
+        },
+        xAxis: {
+            type: 'value',
+            name: 'time (s)',
+            axisLine: { lineStyle: { color: '#b0b8c1' } }, // 축 라인 색상
+            axisLabel: { color: '#b0b8c1' }, // x축 레이블 색상
+            splitLine: { lineStyle: { color: '#444' } }
+        },
+        yAxis: {
+            type: 'value',
+            axisLine: { lineStyle: { color: '#b0b8c1' } },
+            axisLabel: { color: '#b0b8c1' }, // y축 레이블 색상
+            splitLine: { lineStyle: { color: '#444' } }
+        },
         series: groups[groupName].map(sensor => ({
             name: sensor,
             type: 'line',
             showSymbol: false,
-            data: data.map(dp => [dp.time, dp[sensor]])
+            data: data.map(dp => [dp.time, dp[sensor]]),
+            lineStyle: { width: 2 }
         }))
     });
 
     return (
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-            {Object.keys(groups).map(group => (
-                <div
-                    key={group}
-                    style={{
-                        flex: '1 1 400px', // 최소 너비 300px, 가로로 늘어남
-                        padding: '16px',   // 주변 여백
-                        boxSizing: 'border-box',
-                        backgroundColor: '#ececec',
-                        borderRadius: '8px',
-                    }}
-                >
-                    <h4 style={{ textAlign: 'center' }}>{group.toUpperCase()}</h4>
-                    <ReactECharts
-                        option={getOption(group)}
-                        style={{ height: 200, width: '100%' }}
-                    />
-                </div>
-            ))}
+        <div className="w-full h-full overflow-y-auto ">
+            <div className="flex flex-wrap gap-4 p-4">
+                {Object.keys(groups).map(group => (
+                    <div
+                        key={group}
+                        className="flex-1 min-w-[300px] p-4 bg-panel-bg rounded-lg"
+                    >
+                        <h4 className="text-center text-gray-200 mb-2">{group.toUpperCase()}</h4>
+                        <ReactECharts
+                            option={getOption(group)}
+                            style={{ height: 200, width: '100%'}}
+                        />
+                    </div>
+                ))}
+            </div>
         </div>
     );
 }
