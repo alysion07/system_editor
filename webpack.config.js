@@ -87,7 +87,7 @@ module.exports = {
 
     devServer: {
         static: { directory: path.join(__dirname, 'public') },
-        port: 3000,
+        port: 6400,
         hot: true,
         liveReload: false,       // HMR 우선 사용
         historyApiFallback: true
