@@ -29,11 +29,12 @@ export const componentTypes = {
                                     unit: "m², ft²",
                                     placeholder: "0.0",
                                     description: "체적의 단면적",
-                                    helpText: "",
+                                    helpText: "반드시 0보다 큰 값이어야 합니다",
                                     required: true,
                                     relatedFields: ["length", "volume"],
                                     validation: {
-                                        min: 0
+                                        min: 0.000001,
+                                        custom: "validatePositiveNonZero"
                                     }
                                 },
                                 {
@@ -43,11 +44,12 @@ export const componentTypes = {
                                     unit: "m, ft",
                                     placeholder: "0.0",
                                     description: "체적의 길이",
-                                    helpText: "",
+                                    helpText: "반드시 0보다 큰 값이어야 합니다",
                                     required: true,
                                     relatedFields: ["area", "volume"],
                                     validation: {
-                                        min: 0
+                                        min: 0.000001,
+                                        custom: "validatePositiveNonZero"
                                     }
                                 },
                                 {
@@ -57,12 +59,12 @@ export const componentTypes = {
                                     unit: "m³, ft³",
                                     placeholder: "0.0",
                                     description: "체적의 부피",
-                                    helpText: "면적 × 길이와 일치해야 함",
+                                    helpText: "면적 × 길이와 일치해야 함. 자동 계산 또는 수동 입력",
                                     required: false,
                                     relatedFields: ["area", "length"],
                                     validation: {
                                         min: 0,
-                                        custom: "validateVolume"
+                                        custom: "validateVolumeConsistency"
                                     }
                                 },
                                 {
@@ -71,12 +73,11 @@ export const componentTypes = {
                                     type: "number",
                                     unit: "도",
                                     placeholder: "0.0",
-                                    description: "방위각",
-                                    helpText: "절대값 < 360°",
+                                    description: "방위각 (절댓값 ≤ 360도)",
+                                    helpText: "절댓값이 360도 이하여야 함. 위치량으로 정의됨",
                                     required: false,
                                     validation: {
-                                        min: -360,
-                                        max: 360
+                                        custom: "validateAzimuthal"
                                     }
                                 },
                                 {
@@ -85,12 +86,11 @@ export const componentTypes = {
                                     type: "number",
                                     unit: "도",
                                     placeholder: "0.0",
-                                    description: "경사각",
-                                    helpText: "절대값 < 90°",
+                                    description: "경사각 (절댓값 ≤ 90도)",
+                                    helpText: "절댓값이 90도 이하여야 함. 0°는 수평, 양수는 상향 경사",
                                     required: false,
                                     validation: {
-                                        min: -90,
-                                        max: 90
+                                        custom: "validateInclination"
                                     }
                                 },
                                 {
@@ -343,7 +343,342 @@ export const componentTypes = {
                                         { value: "6", label: "[압력, 액체 내부 에너지, 증기 내부 에너지, 증기 체적 분율, 비응축성 품질]" }
                                     ]
                                 },
-                                // 나머지 필드들...
+                                // 옵션 0: [P, Uf, Ug, αg] 필드들
+                                {
+                                    id: "pressure0",
+                                    label: "압력",
+                                    type: "number",
+                                    unit: "Pa, lbf/in²",
+                                    placeholder: "0.0",
+                                    description: "시스템 압력",
+                                    conditionalDisplay: {
+                                        field: "thermoState",
+                                        value: "0"
+                                    },
+                                    required: true,
+                                    validation: {
+                                        min: 0
+                                    }
+                                },
+                                {
+                                    id: "liquidEnergy0",
+                                    label: "액체 비내부 에너지",
+                                    type: "number",
+                                    unit: "J/kg, Btu/lb",
+                                    placeholder: "0.0",
+                                    description: "액체 상의 비내부 에너지",
+                                    conditionalDisplay: {
+                                        field: "thermoState",
+                                        value: "0"
+                                    },
+                                    required: true
+                                },
+                                {
+                                    id: "vaporEnergy0",
+                                    label: "증기 비내부 에너지",
+                                    type: "number",
+                                    unit: "J/kg, Btu/lb",
+                                    placeholder: "0.0",
+                                    description: "증기 상의 비내부 에너지",
+                                    conditionalDisplay: {
+                                        field: "thermoState",
+                                        value: "0"
+                                    },
+                                    required: true
+                                },
+                                {
+                                    id: "voidFraction0",
+                                    label: "증기 체적 분율",
+                                    type: "number",
+                                    placeholder: "0.0",
+                                    description: "증기가 차지하는 체적 비율",
+                                    conditionalDisplay: {
+                                        field: "thermoState",
+                                        value: "0"
+                                    },
+                                    required: true,
+                                    validation: {
+                                        min: 0,
+                                        max: 1
+                                    }
+                                },
+                                // 옵션 1: [T, xs] 필드들
+                                {
+                                    id: "temperature1",
+                                    label: "온도",
+                                    type: "number",
+                                    unit: "K, °F",
+                                    placeholder: "0.0",
+                                    description: "시스템 온도",
+                                    conditionalDisplay: {
+                                        field: "thermoState",
+                                        value: "1"
+                                    },
+                                    required: true,
+                                    validation: {
+                                        min: 0
+                                    }
+                                },
+                                {
+                                    id: "staticQuality1",
+                                    label: "정적 품질",
+                                    type: "number",
+                                    placeholder: "0.0",
+                                    description: "증기 질량 분율",
+                                    conditionalDisplay: {
+                                        field: "thermoState",
+                                        value: "1"
+                                    },
+                                    required: true,
+                                    validation: {
+                                        min: 0,
+                                        max: 1
+                                    }
+                                },
+                                // 옵션 2: [P, xs] 필드들
+                                {
+                                    id: "pressure2",
+                                    label: "압력",
+                                    type: "number",
+                                    unit: "Pa, lbf/in²",
+                                    placeholder: "0.0",
+                                    description: "시스템 압력",
+                                    conditionalDisplay: {
+                                        field: "thermoState",
+                                        value: "2"
+                                    },
+                                    required: true,
+                                    validation: {
+                                        min: 0
+                                    }
+                                },
+                                {
+                                    id: "staticQuality2",
+                                    label: "정적 품질",
+                                    type: "number",
+                                    placeholder: "0.0",
+                                    description: "증기 질량 분율",
+                                    conditionalDisplay: {
+                                        field: "thermoState",
+                                        value: "2"
+                                    },
+                                    required: true,
+                                    validation: {
+                                        min: 0,
+                                        max: 1
+                                    }
+                                },
+                                // 옵션 3: [P, T] 필드들 (기본값)
+                                {
+                                    id: "pressure3",
+                                    label: "압력",
+                                    type: "number",
+                                    unit: "Pa, lbf/in²",
+                                    placeholder: "0.0",
+                                    description: "시스템 압력",
+                                    conditionalDisplay: {
+                                        field: "thermoState",
+                                        value: "3"
+                                    },
+                                    required: true,
+                                    validation: {
+                                        min: 0
+                                    }
+                                },
+                                {
+                                    id: "temperature3",
+                                    label: "온도",
+                                    type: "number",
+                                    unit: "K, °F",
+                                    placeholder: "0.0",
+                                    description: "시스템 온도",
+                                    conditionalDisplay: {
+                                        field: "thermoState",
+                                        value: "3"
+                                    },
+                                    required: true,
+                                    validation: {
+                                        min: 0
+                                    }
+                                },
+                                // 옵션 4: [P, T, xs] 필드들 (비응축성 가스)
+                                {
+                                    id: "pressure4",
+                                    label: "압력",
+                                    type: "number",
+                                    unit: "Pa, lbf/in²",
+                                    placeholder: "0.0",
+                                    description: "시스템 압력",
+                                    conditionalDisplay: {
+                                        field: "thermoState",
+                                        value: "4"
+                                    },
+                                    required: true,
+                                    validation: {
+                                        min: 0
+                                    }
+                                },
+                                {
+                                    id: "temperature4",
+                                    label: "온도",
+                                    type: "number",
+                                    unit: "K, °F",
+                                    placeholder: "0.0",
+                                    description: "시스템 온도 (포화 온도보다 낮아야 함)",
+                                    helpText: "입력 압력에서의 포화 온도보다 낮아야 합니다",
+                                    conditionalDisplay: {
+                                        field: "thermoState",
+                                        value: "4"
+                                    },
+                                    required: true,
+                                    validation: {
+                                        min: 0,
+                                        custom: "validateTemperature4"
+                                    }
+                                },
+                                {
+                                    id: "staticQuality4",
+                                    label: "정적 품질",
+                                    type: "number",
+                                    placeholder: "0.0",
+                                    description: "정적 품질 (0.0 = 건조 비응축성 가스)",
+                                    helpText: "0.0은 전체가 비응축성 가스임을 의미합니다",
+                                    conditionalDisplay: {
+                                        field: "thermoState",
+                                        value: "4"
+                                    },
+                                    required: true,
+                                    validation: {
+                                        min: 0,
+                                        max: 1
+                                    }
+                                },
+                                // 옵션 5: [T, xs, xn] 필드들 (비응축성 가스)
+                                {
+                                    id: "temperature5",
+                                    label: "증기 포화 온도",
+                                    type: "number",
+                                    unit: "K, °F",
+                                    placeholder: "0.0",
+                                    description: "증기 포화 온도",
+                                    conditionalDisplay: {
+                                        field: "thermoState",
+                                        value: "5"
+                                    },
+                                    required: true,
+                                    validation: {
+                                        min: 0
+                                    }
+                                },
+                                {
+                                    id: "staticQuality5",
+                                    label: "정적 품질",
+                                    type: "number",
+                                    placeholder: "0.0",
+                                    description: "정적 품질",
+                                    conditionalDisplay: {
+                                        field: "thermoState",
+                                        value: "5"
+                                    },
+                                    required: true,
+                                    validation: {
+                                        min: 0.000000001,
+                                        max: 0.99999999
+                                    }
+                                },
+                                {
+                                    id: "nonCondQuality5",
+                                    label: "비응축성 품질",
+                                    type: "number",
+                                    placeholder: "0.0",
+                                    description: "비응축성 가스 품질",
+                                    conditionalDisplay: {
+                                        field: "thermoState",
+                                        value: "5"
+                                    },
+                                    required: true,
+                                    validation: {
+                                        min: 0.000000001,
+                                        max: 0.99999999
+                                    }
+                                },
+                                // 옵션 6: [P, Uf, Ug, αg, xn] 필드들 (비응축성 가스)
+                                {
+                                    id: "pressure6",
+                                    label: "압력",
+                                    type: "number",
+                                    unit: "Pa, lbf/in²",
+                                    placeholder: "0.0",
+                                    description: "시스템 압력",
+                                    conditionalDisplay: {
+                                        field: "thermoState",
+                                        value: "6"
+                                    },
+                                    required: true,
+                                    validation: {
+                                        min: 0
+                                    }
+                                },
+                                {
+                                    id: "liquidEnergy6",
+                                    label: "액체 비내부 에너지",
+                                    type: "number",
+                                    unit: "J/kg, Btu/lb",
+                                    placeholder: "0.0",
+                                    description: "액체 상의 비내부 에너지",
+                                    conditionalDisplay: {
+                                        field: "thermoState",
+                                        value: "6"
+                                    },
+                                    required: true
+                                },
+                                {
+                                    id: "vaporEnergy6",
+                                    label: "증기 비내부 에너지",
+                                    type: "number",
+                                    unit: "J/kg, Btu/lb",
+                                    placeholder: "0.0",
+                                    description: "증기 상의 비내부 에너지",
+                                    conditionalDisplay: {
+                                        field: "thermoState",
+                                        value: "6"
+                                    },
+                                    required: true
+                                },
+                                {
+                                    id: "voidFraction6",
+                                    label: "증기 체적 분율",
+                                    type: "number",
+                                    placeholder: "0.0",
+                                    description: "증기가 차지하는 체적 비율",
+                                    conditionalDisplay: {
+                                        field: "thermoState",
+                                        value: "6"
+                                    },
+                                    required: true,
+                                    validation: {
+                                        min: 0,
+                                        max: 1
+                                    }
+                                },
+                                {
+                                    id: "nonCondQuality6",
+                                    label: "비응축성 품질",
+                                    type: "number",
+                                    placeholder: "0.0",
+                                    description: "비응축성 가스 품질",
+                                    helpText: "0 = 비응축성 가스 없음, 1 = 순수 비응축성 가스",
+                                    conditionalDisplay: {
+                                        field: "thermoState",
+                                        value: "6"
+                                    },
+                                    required: true,
+                                    validation: {
+                                        min: 0,
+                                        max: 1,
+                                        custom: "validateNonCondConsistency6"
+                                    }
+                                }
                             ]
                         }
                     ]
@@ -378,6 +713,67 @@ export const componentTypes = {
                     return error <= 0.000001;
                 }
                 return true;
+            },
+            validateAzimuthal: function(value) {
+                if (value === undefined || value === null || value === '') return true;
+                const numValue = parseFloat(value);
+                return !isNaN(numValue) && Math.abs(numValue) <= 360;
+            },
+            validateInclination: function(value) {
+                if (value === undefined || value === null || value === '') return true;
+                const numValue = parseFloat(value);
+                return !isNaN(numValue) && Math.abs(numValue) <= 90;
+            },
+            validateInteger: function(value) {
+                if (value === undefined || value === null || value === '') return true;
+                const numValue = parseFloat(value);
+                return !isNaN(numValue) && Number.isInteger(numValue) && numValue >= 1;
+            },
+            calculateHydraulicDiameter: function(area) {
+                // 수력학적 직경 자동 계산: Dh = 2 * sqrt(Area / π)
+                // 원형 단면 가정
+                if (!area || area <= 0) return 0;
+                return 2 * Math.sqrt(area / Math.PI);
+            },
+            validateTemperature4: function(value, data) {
+                // 간단한 검증: 실제로는 포화 온도 계산이 필요
+                if (value === undefined || value === null || value === '') return true;
+                const numValue = parseFloat(value);
+                return !isNaN(numValue) && numValue > 0;
+            },
+            validateNonCondConsistency6: function(nonCondQuality, data) {
+                if (nonCondQuality === undefined || nonCondQuality === null || nonCondQuality === '') return true;
+                
+                const numValue = parseFloat(nonCondQuality);
+                if (isNaN(numValue)) return false;
+                
+                // 비응축성 품질이 0보다 큰 경우, 체적 분율도 0보다 커야 함
+                if (numValue > 0 && data.voidFraction6 <= 0) {
+                    return false;
+                }
+                
+                // 비응축성 품질이 1인 경우, 체적 분율도 1이어야 함
+                if (numValue === 1 && data.voidFraction6 !== 1) {
+                    return false;
+                }
+                
+                return numValue >= 0 && numValue <= 1;
+            }
+        },
+        calculators: {
+            autoCalculateHydraulicDiameter: function(data) {
+                // hydraulic 필드가 0이거나 비어있을 때 자동 계산
+                if ((!data.hydraulic || data.hydraulic === 0) && data.area && data.area > 0) {
+                    return this.validators.calculateHydraulicDiameter(data.area);
+                }
+                return data.hydraulic;
+            },
+            autoCalculateVolume: function(data) {
+                // volume 필드가 비어있을 때 자동 계산
+                if ((!data.volume || data.volume === 0) && data.area && data.length) {
+                    return data.area * data.length;
+                }
+                return data.volume;
             }
         }
     },
@@ -1619,6 +2015,19 @@ export const componentTypes = {
                             label: "접합부 형상 손실 데이터",
                             description: "레이놀즈 수에 따른 형상 손실 계수를 정의합니다. (선택 사항)",
                             fields: [
+                                {
+                                    id: "volumeNumber",
+                                    label: "체적 번호",
+                                    type: "number",
+                                    placeholder: "1",
+                                    description: "ORNL ANS 인터페이스 모델의 체적 번호 (W3(I))",
+                                    helpText: "ORNL ANS 인터페이스 모델 사용 시 필요한 체적 번호",
+                                    required: false,
+                                    validation: {
+                                        min: 1,
+                                        custom: "validateInteger"
+                                    }
+                                },
                                 {
                                     id: "BF",
                                     label: "순방향 BF",
