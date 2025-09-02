@@ -64,7 +64,12 @@ export const componentTypes = {
                                     relatedFields: ["area", "length"],
                                     validation: {
                                         min: 0,
-                                        custom: "validateVolumeConsistency"
+                                        custom: "validateVolumeConsistency",
+                                        required: "validateVolumeRequired"
+                                    },
+                                    conditionalRequired: function(data) {
+                                        // 면적과 길이가 모두 없으면 체적은 필수
+                                        return !data.area && !data.length;
                                     }
                                 },
                                 {
@@ -244,6 +249,19 @@ export const componentTypes = {
                                     required: true,
                                     validation: {
                                         min: 0
+                                    }
+                                },
+                                {
+                                    id: "volumeNumber",
+                                    label: "체적 번호",
+                                    type: "number",
+                                    placeholder: "1",
+                                    description: "ORNL ANS 인터페이스 모델의 체적 번호 (W3(I))",
+                                    helpText: "ORNL ANS 인터페이스 모델 사용 시 필요한 체적 번호",
+                                    required: true,
+                                    validation: {
+                                        min: 1,
+                                        custom: "validateInteger"
                                     }
                                 }
                             ]
@@ -729,11 +747,51 @@ export const componentTypes = {
                 const numValue = parseFloat(value);
                 return !isNaN(numValue) && Number.isInteger(numValue) && numValue >= 1;
             },
-            calculateHydraulicDiameter: function(area) {
-                // 수력학적 직경 자동 계산: Dh = 2 * sqrt(Area / π)
-                // 원형 단면 가정
+            validatePositiveNonZero: function(value) {
+                if (value === undefined || value === null || value === '') return false;
+                const numValue = parseFloat(value);
+                return !isNaN(numValue) && numValue > 0;
+            },
+            validateVolumeConsistency: function(volume, data) {
+                if (!volume || volume === 0) return true; // 자동 계산되는 경우
+                if (!data.area || !data.length) return true; // 필요한 데이터가 없으면 통과
+                
+                const calculatedVolume = data.area * data.length;
+                const tolerance = 0.01; // 1% 허용 오차
+                const error = Math.abs((volume - calculatedVolume) / calculatedVolume);
+                
+                return error <= tolerance;
+            },
+            validateVolumeRequired: function(volume, data) {
+                // 체적 필수 입력 검증 강화
+                // Case 1: 면적과 길이가 모두 없으면 체적은 필수
+                if (!data.area && !data.length) {
+                    return volume && volume > 0;
+                }
+                
+                // Case 2: 면적 또는 길이 중 하나만 있으면 체적 또는 나머지 하나가 필수
+                if ((data.area && !data.length) || (!data.area && data.length)) {
+                    return volume && volume > 0;
+                }
+                
+                // Case 3: 면적과 길이가 모두 있으면 체적은 선택사항 (자동 계산)
+                return true;
+            },
+            calculateHydraulicDiameter: function(area, length) {
+                // 수력학적 직경 자동 계산
+                // 원형 단면 가정: Dh = 2 * sqrt(Area / π)
+                // 추가적으로 길이와의 일관성 검증 포함
                 if (!area || area <= 0) return 0;
-                return 2 * Math.sqrt(area / Math.PI);
+                
+                const hydraulicDiameter = 2 * Math.sqrt(area / Math.PI);
+                
+                // 수력학적 직경이 비현실적으로 크지 않은지 검증
+                // (길이의 10배를 초과하면 경고하지만 계산은 수행)
+                if (length && hydraulicDiameter > length * 10) {
+                    console.warn(`수력학적 직경(${hydraulicDiameter.toFixed(3)})이 길이(${length})에 비해 매우 큼. 면적값을 확인하세요.`);
+                }
+                
+                return hydraulicDiameter;
             },
             validateTemperature4: function(value, data) {
                 // 간단한 검증: 실제로는 포화 온도 계산이 필요
@@ -764,7 +822,7 @@ export const componentTypes = {
             autoCalculateHydraulicDiameter: function(data) {
                 // hydraulic 필드가 0이거나 비어있을 때 자동 계산
                 if ((!data.hydraulic || data.hydraulic === 0) && data.area && data.area > 0) {
-                    return this.validators.calculateHydraulicDiameter(data.area);
+                    return this.validators.calculateHydraulicDiameter(data.area, data.length);
                 }
                 return data.hydraulic;
             },
