@@ -8,6 +8,7 @@ import ReactFlow, {
     Background,
 } from 'reactflow';
 import {useLocation} from "react-router-dom";
+import { debounce } from 'lodash';
 
 import 'reactflow/dist/style.css';
 import './styles/NodeEditor.css';
@@ -17,7 +18,7 @@ import { componentTypes } from './ComponentsType.jsx';
 import NodeItem from './NodeItem.jsx';
 
 import NodePalette from './NodePalette.jsx';
-import NodeInspector from "./NodeInspector.jsx";
+import NewNodeInspector from "./NewNodeInspector.jsx";
 
 import Toolbar from "./Toolbar.jsx";
 import {SimplifiedNode} from "./simpleNode.jsx";
@@ -215,13 +216,23 @@ const NodeEditor = () => {
         setSelectedNode(null);
     }, [setSelectedNode]);
 
+    const debouncedUpdate = useMemo(
+        () => debounce((nodeId, key, value) => {
+            flowStore.updateNodeProp(nodeId, key, value);
+        }, 500),
+        [flowStore]
+    );
+
+    const handlePropChange = useCallback((nodeId, key, value) => {
+        debouncedUpdate(nodeId, key, value);
+    }, [debouncedUpdate]);
+
     const renderInspector = useCallback(() => {
         if (!selectedNode || !selectedNode.data) return null;
 
-        // 선택한 노드의 componentType 가져오기
         const componentType = selectedNode.data.componentType;
+        const componentDef = componentTypes[componentType];
 
-        // componentType에 따라 다른 컴포넌트 렌더링
         switch (componentType) {
             case "HTSTR":
                 return (
@@ -236,12 +247,12 @@ const NodeEditor = () => {
             case "TMDPJUN":
             case "PIPE":
             case "PUMP":
+                if (!componentDef) return null;
                 return (
-                    <NodeInspector
-                        selectedNode={selectedNode}
-                        componentTypes={componentTypes}
+                    <NewNodeInspector
+                        node={selectedNode}
+                        componentDefinition={componentDef}
                         onPropertyChange={handlePropChange}
-
                     />
                 );
             case "GENSET":
@@ -255,7 +266,7 @@ const NodeEditor = () => {
                     </div>
                 );
         }
-    }, [selectedNode]);
+    }, [selectedNode, handlePropChange]);
 
     const handleExport = useCallback(() => {
         // 사용자에게 내보내기 형식 선택하도록 확인
@@ -310,50 +321,9 @@ const NodeEditor = () => {
         }
     }, [reactFlowInstance, flowStore.present, projectName]);
 
-    // 파일 변경 이벤트 처리
-    // const handleFileChange = useCallback((event) => {
-    //     const fileReader = new FileReader();
-    //     const file = event.target.files[0];
-    //
-    //     if (!file) return;
-    //
-    //     // 파일명에서 확장자 제거 후 프로젝트명으로 설정
-    //     const fileName = file.name.replace(/\.[^/.]+$/, "");
-    //     setProjectName(fileName);
-    //
-    //     fileReader.onload = (e) => {
-    //         try {
-    //             const flowData = JSON.parse(e.target.result);
-    //
-    //             // 유효성 검사
-    //             if (flowData && flowData.nodes && flowData.edges) {
-    //                 // 스토어의 importFlow 함수 호출
-    //                 store.importFlow(flowData);
-    //
-    //                 // ReactFlow 화면 중앙 맞추기
-    //                 setTimeout(() => {
-    //                     reactFlowInstance?.fitView({padding: 0.1});
-    //                 }, 50);
-    //             } else {
-    //                 alert('유효하지 않은 다이어그램 파일입니다.');
-    //             }
-    //         } catch (error) {
-    //             console.error('파일 파싱 중 오류 발생:', error);
-    //             alert('파일을 불러오는 중 오류가 발생했습니다.');
-    //         }
-    //     };
-    //
-    //     fileReader.readAsText(file);
-    //     event.target.value = null;
-    // }, [store, reactFlowInstance, setProjectName]);
-
     const handleSimplify = useCallback(() => {
         setIsSimplified(prev => !prev);
     }, []);
-
-    const handlePropChange = (nodeId, key, value) => {
-        flowStore.updateNodeProp(nodeId, key, value);
-    };
 
     return (
         <div className="node-editor">

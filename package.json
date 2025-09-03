@@ -26,7 +26,8 @@
     "web-vitals": "^2.1.4",
     "webpack": "^5.99.6",
     "webpack-cli": "^6.0.1",
-    "zustand": "^5.0.4"
+    "zustand": "^5.0.4",
+    "lodash": "^4.17.21"
   },
   "scripts": {
     "start": "webpack serve --config webpack.config.js --mode development",
