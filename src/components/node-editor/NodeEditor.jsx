@@ -258,20 +258,57 @@ const NodeEditor = () => {
     }, [selectedNode]);
 
     const handleExport = useCallback(() => {
-        if (reactFlowInstance) {
-            const flowData = reactFlowInstance.toObject();
-            const jsonString = JSON.stringify(flowData, null, 2);
+        // 사용자에게 내보내기 형식 선택하도록 확인
+        const exportSmart = confirm('SMART.i 입력 파일로 내보내시겠습니까?\n\n확인: SMART.i 파일\n취소: JSON 다이어그램 파일');
+        
+        if (exportSmart) {
+            // SMART.i 파일 내보내기
+            import('../../utils/smartFileGenerator.js').then(({ default: smartFileGenerator }) => {
+                try {
+                    // 현재 스토어 데이터 가져오기
+                    const flowData = flowStore.present;
+                    
+                    // SMART.i 파일 생성
+                    const smartFileContent = smartFileGenerator.generateSmartFile(flowData);
+                    
+                    // 파일 다운로드
+                    const blob = new Blob([smartFileContent], { type: 'text/plain; charset=utf-8' });
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = `${projectName || 'generated'}_smart_input.i`;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(url);
+                    
+                    console.log('SMART.i 파일이 성공적으로 생성되었습니다.');
+                } catch (error) {
+                    console.error('SMART.i 파일 생성 중 오류:', error);
+                    alert('SMART.i 파일 생성 중 오류가 발생했습니다: ' + error.message);
+                }
+            }).catch(error => {
+                console.error('smartFileGenerator 모듈 로드 실패:', error);
+                alert('파일 생성기 모듈을 로드할 수 없습니다.');
+            });
+        } else {
+            // 기존 JSON 내보내기 기능
+            if (reactFlowInstance) {
+                const flowData = reactFlowInstance.toObject();
+                const jsonString = JSON.stringify(flowData, null, 2);
 
-            const blob = new Blob([jsonString], {type: 'application/json'});
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = 'flow-diagram.json';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+                const blob = new Blob([jsonString], {type: 'application/json'});
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = 'flow-diagram.json';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+            }
         }
-    }, [reactFlowInstance]);
+    }, [reactFlowInstance, flowStore.present, projectName]);
 
     // 파일 변경 이벤트 처리
     // const handleFileChange = useCallback((event) => {
