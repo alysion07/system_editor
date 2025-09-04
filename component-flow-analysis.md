@@ -480,6 +480,187 @@ const EdgeValidationOverlay = ({ edge, isValid, warnings }) => (
 2. **동적 포트 생성**: 체적 수에 따른 포트 자동 생성
 3. **MARS 파일 역변환**: 기존 파일로부터 다이어그램 자동 생성
 
+## 구현 영향도 분석
+
+### 🔴 고위험 영향 범위
+
+#### 1. 전체 시스템 아키텍처 변경
+- **포트 위치 시스템**: 모든 컴포넌트의 Handle 위치 변경 (Top/Bottom → Left/Right)
+- **연결 코드 포맷**: MARS 표준 CCCVV000N 형식으로 전면 교체
+- **컴포넌트 정의**: PIPE, PUMP, SNGLJUN 포트 구조 재설계
+
+#### 2. 기존 프로젝트 호환성 문제
+- **프로젝트 파일**: 모든 기존 `.json` 파일 마이그레이션 필요
+- **연결 참조**: SNGLJUN `fromConnection`, `toConnection` 속성 형식 변경
+- **엣지 데이터**: ReactFlow 연결 데이터 구조 업데이트 필수
+
+### 🟡 주요 영향 받는 파일
+
+#### 핵심 시각 컴포넌트 (직접 영향)
+```javascript
+// NodeItem.jsx (Lines 38, 57) - 모든 컴포넌트 시각적 표현
+// 현재: Position.Top, Position.Bottom
+// 변경: Position.Left, Position.Right
+```
+
+#### 연결 관리 시스템 (치명적 영향)
+```javascript
+// connectionHelper.jsx (Lines 77-93)
+// 현재: 'ccc000000'/'ccc010000' (잘못된 형식)
+// 변경: 'cccvv000n' MARS 표준 형식
+
+// editorReducer.jsx (Lines 130, 132, 155, 157)  
+// 현재: 하드코딩된 연결 접미사
+// 변경: 면 기반 번호 시스템 (001=입구, 002=출구)
+```
+
+#### 파일 생성 시스템 (치명적 영향)
+```javascript
+// fileGenerator.jsx (Lines 431-494)
+// 현재: 부정확한 연결 형식으로 SNGLJUN 생성
+// 변경: MARS 면 번호 체계 완전 구현
+```
+
+### 🟠 데이터 호환성 문제
+
+#### 1. 마이그레이션 필수 항목
+```javascript
+// 연결 코드 변환 함수 필요
+const migrateConnectionCodes = (oldCode) => {
+    // "110010000" → "110050002" 변환
+    const compNum = oldCode.substring(0, 3);
+    const isOutlet = oldCode.includes('010000');
+    const volumeNum = '05'; // 파이프 기본 체적 5
+    const faceNum = isOutlet ? '2' : '1';
+    return `${compNum}${volumeNum}000${faceNum}`;
+};
+
+// 포트 ID 매핑 변환
+const legacyPortMapping = {
+    'from': { newId: 'face1', position: Position.Left },
+    'to': { newId: 'face2', position: Position.Right },
+    'out': { newId: 'face2', position: Position.Right }
+};
+```
+
+#### 2. 프로젝트 데이터 마이그레이션
+```javascript
+const migrateProjectData = (projectData) => {
+    return {
+        ...projectData,
+        nodes: projectData.nodes.map(migrateNodePorts),
+        edges: projectData.edges.map(migrateEdgeConnections)
+    };
+};
+```
+
+### ⚠️ 위험 완화 전략
+
+#### 1. 점진적 롤아웃 계획
+- **기능 플래그**: 구/신 포트 시스템 토글 기능
+- **이중 지원**: 전환 기간 동안 두 시스템 병행 운영
+- **자동 백업**: 마이그레이션 전 프로젝트 자동 백업
+
+#### 2. 테스트 계획
+
+**Phase 1: 단위 테스트**
+```javascript
+describe('NodeItem Port Positions', () => {
+    test('PIPE component should have left inlet, right outlet', () => {
+        const pipeComponent = render(<NodeItem type="PIPE" />);
+        expect(pipeComponent.getByTestId('inlet-handle'))
+            .toHaveStyle('left: 0');
+        expect(pipeComponent.getByTestId('outlet-handle'))
+            .toHaveStyle('right: 0');
+    });
+});
+
+describe('MARS Face Numbering', () => {
+    test('should generate correct face codes', () => {
+        expect(formatMARSConnection(pipeNode, 'outlet', 5))
+            .toBe('110050002');
+    });
+});
+```
+
+**Phase 2: 통합 테스트**
+- 엣지 생성 시 올바른 MARS 코드 생성 검증
+- 파일 생성 시 SNGLJUN 섹션 정확성 검증
+- Undo/Redo 상태 관리 새 포트 구조 지원 확인
+
+**Phase 3: 사용자 수용 테스트**
+- 수평 흐름의 직관성 및 가독성 검증
+- 연결 워크플로우 사용성 테스트
+- 대용량 다이어그램 성능 테스트
+
+#### 3. 롤백 전략
+```javascript
+// 긴급 롤백을 위한 레거시 모드
+const LEGACY_MODE = process.env.REACT_APP_LEGACY_PORTS || false;
+
+const getPortPosition = (portType) => {
+    if (LEGACY_MODE) {
+        return portType === 'inlet' ? Position.Top : Position.Bottom;
+    }
+    return portType === 'inlet' ? Position.Left : Position.Right;
+};
+```
+
+### 📋 세부 구현 로드맵
+
+#### Phase 1: 핵심 인프라 수정 (2-3주)
+```bash
+# 우선순위 1: 연결 코드 형식 수정
+- connectionHelper.jsx formatConnectionCode 함수 재작성
+- editorReducer.jsx ADD_CONNECTION 액션 면 번호 적용
+- 기존 데이터 마이그레이션 유틸리티 개발
+
+# 우선순위 2: 포트 위치 변경
+- NodeItem.jsx Handle position 수정 (Top/Bottom → Left/Right)
+- ReactFlow 엣지 라우팅 테스트 및 최적화
+```
+
+#### Phase 2: 컴포넌트 정의 업데이트 (1-2주)
+```bash
+# 컴포넌트별 포트 재정의
+- PIPE.js: 면 1/2 + 교차 흐름 면 3-6 지원
+- PUMP.js: 명확한 입구/출구 방향성
+- SNGLJUN.js: From/To 연결의 면 번호 매핑
+
+# 시각적 개선
+- 포트별 색상 구분 (입구: 파란색, 출구: 빨간색)
+- 흐름 방향 표시 화살표 추가
+```
+
+#### Phase 3: 검증 및 테스트 (2주)
+```bash
+# 종합 테스트 수행
+- 연결 로직 정확성 검증
+- MARS 파일 생성 결과 검증
+- 기존 프로젝트 마이그레이션 테스트
+- 성능 벤치마크 (대용량 다이어그램)
+```
+
+#### Phase 4: 사용자 경험 개선 (1주)
+```bash
+# UX 향상 작업
+- 실시간 연결 유효성 피드백
+- 도움말 및 가이드 업데이트
+- 연결 오류 시 명확한 메시지 제공
+```
+
+### 🎯 성공 지표
+
+#### 기술적 지표
+- **연결 정확도**: MARS 시뮬레이션 파일 100% 호환
+- **마이그레이션 성공률**: 기존 프로젝트 데이터 무손실 변환
+- **성능 유지**: 포트 변경 후에도 렌더링 성능 동일 수준
+
+#### 사용자 지표  
+- **학습 곡선**: 새로운 연결 패턴 적응 시간 최소화
+- **오류 감소**: 잘못된 연결로 인한 시뮬레이션 오류 90% 감소
+- **직관성**: 수평 흐름으로 P&ID 다이어그램 유사성 증가
+
 ## 예상 개선 효과
 
 ### 기술적 개선
@@ -495,5 +676,6 @@ const EdgeValidationOverlay = ({ edge, isValid, warnings }) => (
 ---
 
 **작성일**: 2025-09-04  
-**분석 기준**: MARS Input Manual + 실제 사용자 입력 파일 (SMART.i, copain.i)  
+**최종 업데이트**: 2025-09-04 (영향도 분석 추가)  
+**분석 기준**: MARS Input Manual + 실제 사용자 입력 파일 (SMART.i, copain.i) + 코드베이스 종속성 분석  
 **구현 대상**: sys_edit_cl NodeEditor 컴포넌트
