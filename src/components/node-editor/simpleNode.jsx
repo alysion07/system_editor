@@ -209,6 +209,20 @@ export function SimplifiedNode({ id, data, type }) {
     return (
             <div className="simple-node-container">
                 {renderNode()}
+                
+                {/* 삭제 버튼 추가 */}
+                <button
+                    className="simple-node-delete-btn"
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        if (data.onDelete) {
+                            data.onDelete();
+                        }
+                    }}
+                    title="Delete Node"
+                >
+                    ×
+                </button>
 
                 <Handle type="target" position={Position.Top}/>
                 <Handle type="source" position={Position.Bottom}/>

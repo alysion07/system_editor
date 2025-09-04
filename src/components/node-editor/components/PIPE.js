@@ -5,8 +5,46 @@ const PIPE = {
     description: '파이프 컴포넌트는 여러 체적으로 구성된 1차원 유체 흐름 경로를 나타냅니다.',
     category: 'hydro',
     ports: {
-        inputs: [{ id: 'from', label: 'From' }],
-        outputs: [{ id: 'to', label: 'To' }]
+        // Primary flow ports (MARS Face 1-2)
+        inputs: [
+            { 
+                id: 'inlet', 
+                label: 'Inlet (Face 1)', 
+                position: 'left', 
+                marsCode: 1, 
+                connectionType: 'fluid',
+                description: '첫 번째 체적 주 흐름 입구'
+            }
+        ],
+        outputs: [
+            { 
+                id: 'outlet', 
+                label: 'Outlet (Face 2)', 
+                position: 'right', 
+                marsCode: 2, 
+                connectionType: 'fluid',
+                description: '마지막 체적 주 흐름 출구'
+            }
+        ],
+        // Crossflow ports (MARS Face 3-4) - bidirectional
+        bidirectional: [
+            {
+                id: 'crossflow_top',
+                label: 'Crossflow Top (Face 4)',
+                position: 'top',
+                marsCode: 4,
+                connectionType: 'fluid',
+                description: 'Y+ 방향 교차흐름 (양방향)'
+            },
+            {
+                id: 'crossflow_bottom', 
+                label: 'Crossflow Bottom (Face 3)',
+                position: 'bottom',
+                marsCode: 3,
+                connectionType: 'fluid',
+                description: 'Y- 방향 교차흐름 (양방향)'
+            }
+        ]
     },
     properties: {
         tabs: [

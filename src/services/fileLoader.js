@@ -29,5 +29,67 @@ export const FileLoader = {
             throw new Error('nodes 또는 edges 구조가 올바르지 않습니다.');
         }
         return true;
+    },
+
+    /**
+     * Migrate legacy valve components to unified VALVE format
+     * @param {Object} data - Flow data with nodes and edges
+     * @returns {Object} Migrated data with unified valve components
+     */
+    migrateLegacyValves(data) {
+        const legacyValveTypes = ['CHKVLV', 'TRPVLV', 'INRVLV', 'MTRVLV', 'SRVVLV', 'RLFVLV'];
+        let hasMigrations = false;
+        
+        const migratedNodes = data.nodes.map(node => {
+            if (legacyValveTypes.includes(node.data?.componentType)) {
+                hasMigrations = true;
+                const originalType = node.data.componentType;
+                
+                return {
+                    ...node,
+                    data: {
+                        ...node.data,
+                        componentType: 'VALVE',
+                        componentProp: {
+                            valveType: originalType,
+                            ...(node.data.componentProp || {})
+                        },
+                        meta: {
+                            typeSelected: true,
+                            migratedFrom: originalType,
+                            migrationDate: new Date().toISOString(),
+                            version: '2.0',
+                            ...(node.data.meta || {})
+                        }
+                    }
+                };
+            }
+            return node;
+        });
+        
+        if (hasMigrations) {
+            console.log('Migrated legacy valve components to unified VALVE format');
+        }
+        
+        return {
+            ...data,
+            nodes: migratedNodes,
+            metadata: {
+                ...(data.metadata || {}),
+                migrationApplied: hasMigrations,
+                migrationDate: hasMigrations ? new Date().toISOString() : undefined
+            }
+        };
+    },
+
+    /**
+     * Load and process flow data with migration support
+     * @param {string} text - JSON text to parse
+     * @returns {Object} Parsed and migrated flow data
+     */
+    loadWithMigration(text) {
+        const data = this.parse(text);
+        this.validateFlowData(data);
+        return this.migrateLegacyValves(data);
     }
 };

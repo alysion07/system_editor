@@ -1,11 +1,31 @@
 const PUMP = {
     type: 'PUMP',
-    label: 'Pump',
+    label: 'PUMP',
     icon: '⚙️',
     category: 'hydro',
     ports: {
-        inputs: [{ id: 'from', label: 'In' }],
-        outputs: [{ id: 'to', label: 'Out' }]
+        inputs: [
+            { 
+                id: 'suction', 
+                label: 'Suction (Face 1)', 
+                position: 'left', 
+                marsCode: 1, 
+                connectionType: 'fluid',
+                description: '펌프 흡입구 (Volume 01)',
+                flowDirection: 'forced_inlet'
+            }
+        ],
+        outputs: [
+            { 
+                id: 'discharge', 
+                label: 'Discharge (Face 2)', 
+                position: 'right', 
+                marsCode: 2, 
+                connectionType: 'fluid',
+                description: '펌프 토출구 (Volume 02)',
+                flowDirection: 'forced_outlet'
+            }
+        ]
     },
     defaultData: {
         flowRate: 10.0, // in kg/s

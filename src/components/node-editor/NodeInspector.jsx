@@ -50,7 +50,25 @@ const NodeInspector = ({ selectedNode, componentTypes, onPropertyChange }) => {
 
     // Get component definition for the selected node
     const componentType = selectedNode.data?.componentType;
-    const componentDef = componentTypes[componentType];
+    let componentDef = componentTypes[componentType];
+
+    // Special handling for unified VALVE component
+    if (componentType === 'VALVE') {
+        const valveType = selectedNode.data?.componentProp?.valveType;
+        
+        if (valveType) {
+            // Get dynamic properties for selected valve type
+            try {
+                componentDef = {
+                    ...componentDef,
+                    properties: componentDef.getDynamicProperties(valveType)
+                };
+            } catch (error) {
+                console.error(`Failed to load dynamic properties for valve type ${valveType}:`, error);
+            }
+        }
+        // If no valve type selected, use base VALVE properties (type selection only)
+    }
 
     // If component definition is not found, show error
     if (!componentDef) {
@@ -63,8 +81,52 @@ const NodeInspector = ({ selectedNode, componentTypes, onPropertyChange }) => {
 
         // 입력값 변경 핸들러
     const handleFieldChange = (key, value) => {
-            setFormValues(prev => ({ ...prev, [key]: value }));
-        };
+        // Special handling for valve type changes
+        if (key === 'valveType' && componentType === 'VALVE') {
+            handleValveTypeChange(value);
+            return;
+        }
+        
+        setFormValues(prev => ({ ...prev, [key]: value }));
+    };
+
+    // Special handler for valve type changes
+    const handleValveTypeChange = (newValveType) => {
+        const currentValveType = selectedNode.data?.componentProp?.valveType;
+        
+        if (!newValveType || newValveType === currentValveType) return;
+        
+        // Update valve type immediately
+        setFormValues(prev => ({ ...prev, valveType: newValveType }));
+        onPropertyChange(selectedNode.id, 'valveType', newValveType);
+        
+        // Apply default values for the new valve type
+        try {
+            if (componentTypes.VALVE && componentTypes.VALVE.getDefaultPropertiesForType) {
+                const defaultProps = componentTypes.VALVE.getDefaultPropertiesForType(newValveType);
+                
+                // Apply defaults without overriding existing values
+                Object.entries(defaultProps).forEach(([propKey, defaultValue]) => {
+                    if (formValues[propKey] === undefined || formValues[propKey] === null || formValues[propKey] === '') {
+                        setFormValues(prev => ({ ...prev, [propKey]: defaultValue }));
+                        onPropertyChange(selectedNode.id, propKey, defaultValue);
+                    }
+                });
+            }
+        } catch (error) {
+            console.error(`Failed to apply defaults for valve type ${newValveType}:`, error);
+        }
+        
+        // Update metadata
+        onPropertyChange(selectedNode.id, 'meta', {
+            ...selectedNode.data?.componentProp?.meta,
+            typeSelected: true,
+            lastTypeChange: new Date().toISOString(),
+            version: '2.0'
+        });
+        
+        console.log(`Valve type changed to: ${newValveType}`);
+    };
 
     // 포커스 아웃 시 저장
     const handleBlur = (e) => {
@@ -384,7 +446,7 @@ const NodeInspector = ({ selectedNode, componentTypes, onPropertyChange }) => {
         return (
             <div
                 key={`content-${tab.id}`}
-                className={`tab-content ${activeTab === tab.id ? 'active' : ''}`}
+                className="tab-content"
             >
                 {tab.cards.map(card => renderCard(card))}
             </div>
@@ -397,9 +459,47 @@ const NodeInspector = ({ selectedNode, componentTypes, onPropertyChange }) => {
              onBlur={handleBlur}
         >
             <div className="inspector-header">
-                <h2 className="component-title">{componentDef.label}</h2>
-                <div className="component-type">{componentType}</div>
-                <p className="component-description">{componentDef.description}</p>
+                <h2 className="component-title">
+                    {componentType === 'VALVE' && formValues.valveType ? (
+                        <span>
+                            <span style={{marginRight: '8px'}}>🔧</span>
+                            {(() => {
+                                try {
+                                    const { getValveConfiguration } = require('./components/valve/ValveTypeRegistry.js');
+                                    const typeConfig = getValveConfiguration(formValues.valveType);
+                                    return typeConfig.displayName;
+                                } catch (error) {
+                                    return componentDef.label;
+                                }
+                            })()}
+                        </span>
+                    ) : componentDef.label}
+                </h2>
+                
+                <div className="component-type">
+                    {componentType === 'VALVE' && formValues.valveType ? (
+                        `VALVE (${formValues.valveType})`
+                    ) : componentType}
+                    {componentType === 'VALVE' && !formValues.valveType && (
+                        <span className="type-warning" style={{color: '#ff6b6b', marginLeft: '8px'}}>
+                            ⚠️ 타입 선택 필요
+                        </span>
+                    )}
+                </div>
+                
+                <p className="component-description">
+                    {componentType === 'VALVE' && formValues.valveType ? (
+                        (() => {
+                            try {
+                                const { getValveConfiguration } = require('./components/valve/ValveTypeRegistry.js');
+                                const typeConfig = getValveConfiguration(formValues.valveType);
+                                return typeConfig.description;
+                            } catch (error) {
+                                return componentDef.description;
+                            }
+                        })()
+                    ) : componentDef.description}
+                </p>
 
                 {/* Component ID and Name fields */}
                 <div className="component-identification">
@@ -443,7 +543,12 @@ const NodeInspector = ({ selectedNode, componentTypes, onPropertyChange }) => {
                     </div>
 
                     <div className="tab-container">
-                        {componentDef.properties.tabs.map(tab => renderTabContent(tab))}
+                        {componentDef.properties.tabs.map(tab => {
+                            if (activeTab === tab.id) {
+                                return renderTabContent(tab);
+                            }
+                            return null;
+                        })}
                     </div>
                 </div>
             )}

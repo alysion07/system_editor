@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React, { memo, useState } from 'react';
 import { Handle, Position } from 'reactflow';
 import './styles/NodeItem.css';
 import { componentTypes } from './ComponentsType.jsx';
@@ -135,30 +135,131 @@ const renderPorts = (data, componentType) => {
         });
     }
 
+    // Render thermal ports (HTSTR specific)
+    if (componentDef.ports.thermal) {
+        componentDef.ports.thermal.forEach(port => {
+            // Thermal ports are bidirectional by nature
+            ports.push(
+                <Handle
+                    key={`thermal-target-${port.id}`}
+                    type="target"
+                    position={getPortPosition(port.position)}
+                    id={`${port.id}-in`}
+                    style={getPortStyle({ ...port, type: 'target' }, componentType)}
+                    data-connection-type="thermal"
+                />
+            );
+            ports.push(
+                <Handle
+                    key={`thermal-source-${port.id}`}
+                    type="source"
+                    position={getPortPosition(port.position)}
+                    id={`${port.id}-out`}
+                    style={getPortStyle({ ...port, type: 'source' }, componentType)}
+                    data-connection-type="thermal"
+                />
+            );
+        });
+    }
+
     return ports;
 };
 
 const NodeItem = ({ data, type, onDelete }) => {
+    // State for showing/hiding properties
+    const [showProperties, setShowProperties] = useState(false);
+    
+    // Special handling for unified VALVE component
+    const isValve = data.componentType === 'VALVE';
+    const valveType = isValve ? data.componentProp?.valveType : null;
+    const needsTypeSelection = isValve && !valveType;
+    
+    // Get display label for valve component
+    const getDisplayLabel = () => {
+        if (isValve) {
+            if (valveType) {
+                // Try to get the valve configuration for display name
+                const valveTypes = {
+                    CHKVLV: 'Check Valve',
+                    TRPVLV: 'Trip Valve',
+                    INRVLV: 'Inertial Valve',
+                    MTRVLV: 'Motor Valve',
+                    SRVVLV: 'Servo Valve',
+                    RLFVLV: 'Relief Valve'
+                };
+                return valveTypes[valveType] || valveType;
+            }
+            return 'VALVE - Select Type';
+        }
+        return data.componentType;
+    };
+    
+    // Get valve type icon
+    const getValveIcon = () => {
+        if (!isValve || !valveType) return null;
+        
+        const valveIcons = {
+            CHKVLV: '',
+            TRPVLV: '',
+            INRVLV: '️',
+            MTRVLV: '',
+            SRVVLV: '️',
+            RLFVLV: ''
+        };
+        
+        return valveIcons[valveType] || '⚙️';
+    };
+    
     return (
-        <div className="node">
+        <div className={`node ${needsTypeSelection ? 'node-needs-config' : ''}`}>
             <div className={`node-header-${data.componentType}`}>
                 <div className={'node-header'}>
-                    {/*<div className="node-icon">{componentDef.icon}</div>*/}
-                    <div className="position-node-label">{data.componentType}</div>
+                    {isValve && valveType && (
+                        <div className="node-icon" style={{ fontSize: '16px', marginRight: '4px' }}>
+                            {getValveIcon()}
+                        </div>
+                    )}
+                    <div className="position-node-label">
+                        {getDisplayLabel()}
+                        {needsTypeSelection && (
+                            <span style={{ 
+                                marginLeft: '8px', 
+                                color: '#ff9800',
+                                fontSize: '14px',
+                                fontWeight: 'bold'
+                            }}>
+                                ⚠️
+                            </span>
+                        )}
+                    </div>
                     <div className="node-title">
                         {/*{node.name || componentDef.label}*/}
                     </div>
-                    <button
-                        className="node-delete-btn"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            console.log('delete button clicked', data.onDelete);
-                            if (data.onDelete)
-                                data.onDelete();
-                        }}
-                    >
-                        ×
-                    </button>
+                    <div className="node-header-buttons">
+                        <button
+                            className="node-menu-btn"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setShowProperties(!showProperties);
+                            }}
+                            title={showProperties ? "숨기기" : "속성 보기"}
+                        >
+                            <span className={`hamburger-icon ${showProperties ? 'rotated' : ''}`}>
+                                ☰
+                            </span>
+                        </button>
+                        <button
+                            className="node-delete-btn"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                console.log('delete button clicked', data.onDelete);
+                                if (data.onDelete)
+                                    data.onDelete();
+                            }}
+                        >
+                            ×
+                        </button>
+                    </div>
                 </div>
             </div>
             {/* node body */ }
@@ -168,19 +269,39 @@ const NodeItem = ({ data, type, onDelete }) => {
                     <div className="node-position">
                         {data.label}
                     </div>
-                    <div className="node-content">
-                        {data.componentProp && Object.entries(data.componentProp).map(([key, value]) => {
-                        {/*{data && Object.entries(data).map(([key, value]) => {*/}
-                            const formatted = formatNodeValue(key, value);
-                            if (formatted === null) return null;
-                            return (
-                                <div key={key} className="node-property">
-                                    <span className="property-name">{key}:</span>
-                                    <span className="property-value">{formatted}</span>
-                                </div>
-                            );
-                        })}
-                    </div>
+                    {needsTypeSelection && (
+                        <div style={{
+                            padding: '8px',
+                            backgroundColor: '#fff3e0',
+                            border: '1px solid #ff9800',
+                            borderRadius: '4px',
+                            marginBottom: '8px',
+                            fontSize: '12px',
+                            textAlign: 'center',
+                            color: '#e65100'
+                        }}>
+                            Click to select valve type
+                        </div>
+                    )}
+                    {showProperties && (
+                        <div className={`node-properties ${showProperties ? 'expanded' : 'collapsed'}`}>
+                            {data.componentProp && Object.entries(data.componentProp).map(([key, value]) => {
+                            {/*{data && Object.entries(data).map(([key, value]) => {*/}
+                                const formatted = formatNodeValue(key, value);
+                                if (formatted === null) return null;
+                                // Skip showing valveType as a raw property
+                                if (key === 'valveType' && isValve) {
+                                    return null; // Already shown in header
+                                }
+                                return (
+                                    <div key={key} className="node-property">
+                                        <span className="property-name">{key}:</span>
+                                        <span className="property-value">{formatted}</span>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

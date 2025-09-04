@@ -74,10 +74,12 @@ const NodeEditor = () => {
                 if (!existing.includes(projectName)) return;
 
                 const json = await ProjectService.loadProjectJson(userId, projectName);
-                FileLoader.validateFlowData(json);
+                // Apply migration for legacy valve components
+                const migratedJson = FileLoader.migrateLegacyValves(json);
+                FileLoader.validateFlowData(migratedJson);
 
                 if (!cancelled) {
-                    flowStore.importFlow(json);
+                    flowStore.importFlow(migratedJson);
                     isLoded = true;
 
                     setTimeout(() => {
@@ -107,13 +109,21 @@ const NodeEditor = () => {
         }
     }, [reactFlowInstance, nodes.length]);
 
+    // handleDeleteNode를 useEffect 전에 정의
+    const handleDeleteNode = useCallback((nodeId) => {
+        flowStore.deleteNode(nodeId);
+    }, [flowStore]);
 
     useEffect(() => {
         if (isSimplified) {
             setNodes(flowStore.present.nodes.map(node => ({
                 ...node,
                 type: 'simple',
-                data: {...node.data, icon: node.data.icon}
+                data: {
+                    ...node.data, 
+                    icon: node.data.icon,
+                    onDelete: () => handleDeleteNode(node.id) // 간소화 모드에도 onDelete 콜백 추가
+                }
             })));
             setEdges(flowStore.present.edges);
         } else {
@@ -123,7 +133,7 @@ const NodeEditor = () => {
             })) : []);
             setEdges(flowStore.present.edges);
         }
-    }, [flowStore.present.nodes, flowStore.present.edges, isSimplified]);
+    }, [flowStore.present.nodes, flowStore.present.edges, isSimplified, handleDeleteNode]);
 
     const handleSave = useCallback(async () => {
         if (!userId || !projectName || !reactFlowInstance) {
@@ -188,9 +198,31 @@ const NodeEditor = () => {
         setSelectedNode({id: 'genset', type: 'GENSET', data: {label: 'Genset', componentType: 'GENSET'}});
     }, []);
 
-    const handleDeleteNode = useCallback((nodeId) => {
-        flowStore.deleteNode(nodeId);
-    }, [flowStore]);
+    // 키보드 단축키 핸들러 추가
+    const handleKeyDown = useCallback((event) => {
+        // Delete 또는 Backspace 키를 눌렀을 때
+        if ((event.key === 'Delete' || event.key === 'Backspace') && flowStore.selectedNodeId) {
+            // input이나 textarea에 포커스가 있지 않을 때만 삭제
+            const activeElement = document.activeElement;
+            const isInputFocused = activeElement.tagName === 'INPUT' || 
+                                   activeElement.tagName === 'TEXTAREA' || 
+                                   activeElement.contentEditable === 'true';
+            
+            if (!isInputFocused) {
+                event.preventDefault();
+                
+                // Shift 키가 눌려있으면 확인 없이 즉시 삭제
+                if (event.shiftKey) {
+                    handleDeleteNode(flowStore.selectedNodeId);
+                } else {
+                    // 기본적으로는 확인 다이얼로그 표시
+                    if (window.confirm('선택한 노드를 삭제하시겠습니까?')) {
+                        handleDeleteNode(flowStore.selectedNodeId);
+                    }
+                }
+            }
+        }
+    }, [flowStore.selectedNodeId, handleDeleteNode]);
 
     const handleDrop = useCallback((event) => {
         event.preventDefault();
@@ -236,6 +268,7 @@ const NodeEditor = () => {
             case "TMDPJUN":
             case "PIPE":
             case "PUMP":
+            case "VALVE":
                 return (
                     <NodeInspector
                         selectedNode={selectedNode}
@@ -326,6 +359,8 @@ const NodeEditor = () => {
 
                 <div className="reactflow-wrapper" ref={reactFlowWrapper}
                      onDrop={handleDrop}
+                     onKeyDown={handleKeyDown}
+                     tabIndex={0}
                 >
                     <ReactFlow
                         onDragOver={handleDragOver}

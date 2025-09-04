@@ -9,6 +9,9 @@ import BRANCH from './components/BRANCH.js';
 import ANNULUS from './components/ANNULUS.js';
 import PRIZER from './components/PRIZER.js';
 
+// Unified VALVE component import (replaces 6 individual valve types)
+import VALVE from './components/UnifiedValve.js';
+
 export const componentTypes = {
     SNGLVOL,
     TMDPVOL,
@@ -18,7 +21,8 @@ export const componentTypes = {
     PUMP,
     BRANCH,
     ANNULUS,
-    PRIZER
+    PRIZER,
+    VALVE
 };
 
 

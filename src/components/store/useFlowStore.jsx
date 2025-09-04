@@ -82,7 +82,8 @@ const useFlowStore = create((set, get) => ({
         const nodes = present.nodes.filter((n) => n.id !== nodeId);
         const edges = present.edges.filter((e) => e.source !== nodeId && e.target !== nodeId);
         set(nodes, edges);
-        store.selectedNodeId = null; // 선택 초기화
+        // Zustand 상태 관리 원칙에 따라 set 함수를 사용하여 selectedNodeId 초기화
+        get().setSelectedNodeId(null);
     },
 
     setSelectedNodeId: (id) => set({ selectedNodeId: id }),

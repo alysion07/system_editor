@@ -10,7 +10,12 @@
       "Read(/D:\\workspace\\sys_edit_cl\\public\\ref\\8 HYDRODYNAMIC COMPONENTS/**)",
       "Read(/D:\\workspace\\sys_edit_cl\\public\\ref\\8 HYDRODYNAMIC COMPONENTS/**)",
       "Read(/D:\\workspace\\sys_edit_cl\\public\\ref\\8 HYDRODYNAMIC COMPONENTS/**)",
-      "Read(/D:\\workspace\\sys_edit_cl\\public\\ref\\8 HYDRODYNAMIC COMPONENTS/**)"
+      "Read(/D:\\workspace\\sys_edit_cl\\public\\ref\\8 HYDRODYNAMIC COMPONENTS/**)",
+      "Read(/D:\\workspace\\sys_edit_cl\\src\\components\\store/**)",
+      "Read(/D:\\workspace\\sys_edit_cl\\src\\components\\node-editor\\components/**)",
+      "Read(/D:\\workspace\\sys_edit_cl\\src\\components\\node-editor/**)",
+      "Read(/D:\\workspace\\sys_edit_cl\\src\\components\\node-editor/**)",
+      "Read(/D:\\workspace\\sys_edit_cl\\src\\components\\node-editor\\styles/**)"
     ],
     "deny": [],
     "ask": []

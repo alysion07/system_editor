@@ -40,6 +40,43 @@
     font-weight: 600;
 }
 
+.node-header-buttons {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.node-menu-btn {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    color: var(--light-text-color);
+    font-size: 14px;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: all 0.2s;
+    border-radius: 5px;
+}
+
+.node-menu-btn:hover {
+    color: var(--primary-color);
+    background-color: rgba(52, 152, 219, 0.2);
+    opacity: 1;
+}
+
+.hamburger-icon {
+    transition: transform 0.2s ease;
+    display: inline-block;
+}
+
+.hamburger-icon.rotated {
+    transform: rotate(90deg);
+}
+
 .node-delete-btn {
     width: 20px;
     height: 20px;
@@ -76,6 +113,62 @@
     overflow-x: hidden;
 }
 
+/* --- Node Properties --- */
+.node-properties {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 8px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    margin-top: 8px;
+    transition: all 0.3s ease-in-out;
+    animation: slideDown 0.3s ease-out;
+}
+
+.node-properties.expanded {
+    max-height: 200px;
+    opacity: 1;
+}
+
+.node-properties.collapsed {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+}
+
+.node-property {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 2px 4px;
+    border-radius: 4px;
+    background-color: rgba(255, 255, 255, 0.05);
+    font-size: 11px;
+}
+
+.property-name {
+    color: var(--light-text-color);
+    font-weight: 500;
+    margin-right: 8px;
+}
+
+.property-value {
+    color: var(--text-color);
+    font-weight: 400;
+    text-align: right;
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(-10px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
 .position-node-label {
     font-weight: 500;
     border-radius: 15px;
@@ -92,7 +185,34 @@
 .node-header-pressurizer .position-node-label { background-color: #e67e22; }
 .node-header-PIPE .position-node-label { background-color: #7f8c8d; }
 .node-header-PUMP .position-node-label { background-color: #d35400; }
+.node-header-VALVE .position-node-label { background-color: #34495e; }
 
+
+/* --- Node that needs configuration --- */
+.node.node-needs-config {
+    border: 2px dashed #ff9800;
+    animation: needsConfig 2s ease-in-out infinite;
+}
+
+.node.node-needs-config:hover {
+    border-color: #ff6b35;
+    box-shadow: 0 12px 32px rgba(255, 152, 0, 0.3);
+}
+
+@keyframes needsConfig {
+    0%, 100% {
+        opacity: 0.8;
+    }
+    50% {
+        opacity: 1;
+    }
+}
+
+.node-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
 
 /* --- Selection Style: A glowing effect --- */
 .react-flow__node.selected .node {

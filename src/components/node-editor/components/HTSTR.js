@@ -5,7 +5,37 @@ const HTSTR = {
     category: 'thermal',
     icon: 'HS',
     ports: {
-        // ... 포트 정의 ...
+        // HTSTR has thermal connection ports only (no mass flow)
+        thermal: [
+            {
+                id: 'thermal_left',
+                label: 'Left Surface',
+                position: 'left',
+                connectionType: 'thermal',
+                description: '좌측 표면 열적 연결 (대류/복사)'
+            },
+            {
+                id: 'thermal_right',
+                label: 'Right Surface', 
+                position: 'right',
+                connectionType: 'thermal',
+                description: '우측 표면 열적 연결 (대류/복사)'
+            },
+            {
+                id: 'thermal_top',
+                label: 'Top Surface',
+                position: 'top', 
+                connectionType: 'thermal',
+                description: '상단 표면 열적 연결 (대류/복사)'
+            },
+            {
+                id: 'thermal_bottom',
+                label: 'Bottom Surface',
+                position: 'bottom',
+                connectionType: 'thermal', 
+                description: '하단 표면 열적 연결 (대류/복사)'
+            }
+        ]
     },
     properties: {
         tabs: [
