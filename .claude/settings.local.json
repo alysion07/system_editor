@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(/D:\\workspace\\sys_edit_cl/**)",
+      "Read(/D:\\workspace\\sys_edit_cl/**)",
+      "Read(/D:\\workspace\\sys_edit_cl\\src/**)",
+      "Read(/D:\\workspace\\sys_edit_cl\\src\\components\\store/**)",
+      "Read(/D:\\workspace\\sys_edit_cl\\src\\components\\store/**)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
