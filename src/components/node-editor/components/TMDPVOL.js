@@ -6,11 +6,16 @@ const TMDPVOL = {
     category:'hydro',
     Name:'TV000',
     ports: {
-        // inputs: [
-        //     { id: "from", label: "From" }
-        // ],
+        // TMDPVOL is source-only (boundary condition)
         outputs: [
-            { id: "to", label: "To" }
+            { 
+                id: "outlet", 
+                label: "Outlet",
+                position: 'right',
+                marsCode: 2,
+                connectionType: 'fluid',
+                description: 'Time-dependent boundary condition outlet'
+            }
         ]
     },
     properties: {

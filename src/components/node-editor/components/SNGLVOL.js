@@ -7,8 +7,47 @@ const SNGLVOL = {
     description: '단일 체적 컴포넌트는 유체 시스템의 단일 제어 체적을 나타냅니다.',
     category: 'hydro',
     ports: {
-        inputs: [{ id: 'from', label: 'From' }],
-        outputs: [{ id: 'to', label: 'To' }]
+        // Primary flow ports (MARS Face 1-2)
+        inputs: [
+            { 
+                id: 'face1', 
+                label: 'Face 1 (X-)', 
+                position: 'left', 
+                marsCode: 1, 
+                connectionType: 'fluid',
+                description: 'X- 방향 주 흐름 입구'
+            }
+        ],
+        outputs: [
+            { 
+                id: 'face2', 
+                label: 'Face 2 (X+)', 
+                position: 'right', 
+                marsCode: 2, 
+                connectionType: 'fluid',
+                description: 'X+ 방향 주 흐름 출구'
+            }
+        ],
+        // Crossflow ports (MARS Face 3-6) - bidirectional
+        bidirectional: [
+            {
+                id: 'face3',
+                label: 'Face 3 (Y-)',
+                position: 'bottom',
+                marsCode: 3,
+                connectionType: 'fluid',
+                description: 'Y- 방향 교차흐름'
+            },
+            {
+                id: 'face4', 
+                label: 'Face 4 (Y+)',
+                position: 'top',
+                marsCode: 4,
+                connectionType: 'fluid',
+                description: 'Y+ 방향 교차흐름'
+            }
+            // Note: Face 5-6 (Z-axis) implementation deferred to Phase 3
+        ]
     },
     properties: {
         tabs: [
@@ -570,7 +609,7 @@ const SNGLVOL = {
                                     max: 1
                                 }
                             },
-                            // 옵션 5: [T, xs, xn] 필드들 (비응축성 가스)
+                            // 옵션 5: [T, xs, xn] 필드들
                             {
                                 id: "temperature5",
                                 label: "증기 포화 온도",

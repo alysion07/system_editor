@@ -6,10 +6,24 @@ const SNGLJUN = {
     icon: 'SGJ',
     ports: {
         inputs: [
-            { id: "from", label: "From" }
+            { 
+                id: "from", 
+                label: "From",
+                position: 'left',
+                marsCode: 1,
+                connectionType: 'fluid',
+                description: '유체 흐름 입구 (Face 1 연결)'
+            }
         ],
         outputs: [
-            { id: "to", label: "To" }
+            { 
+                id: "to", 
+                label: "To",
+                position: 'right',
+                marsCode: 2,
+                connectionType: 'fluid',
+                description: '유체 흐름 출구 (Face 2 연결)'
+            }
         ]
     },
     properties: {
