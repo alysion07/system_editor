@@ -8,6 +8,7 @@ const useFlowStore = create((set, get) => ({
     present: { nodes: initialNodes, edges: initialEdges },
     future: [],
     selectedNodeId: null,
+    selectedEdgeId: null,
     canUndo: false,
     canRedo: false,
     dragStartNodes: null,
@@ -85,8 +86,16 @@ const useFlowStore = create((set, get) => ({
         // Zustand 상태 관리 원칙에 따라 set 함수를 사용하여 selectedNodeId 초기화
         get().setSelectedNodeId(null);
     },
+    deleteEdge: (edgeId) => {
+        const { present, set } = get();
+        const edges = present.edges.filter((e) => e.id !== edgeId);
+        set(present.nodes, edges);
+        // Clear edge selection after deletion
+        get().setSelectedEdgeId(null);
+    },
 
     setSelectedNodeId: (id) => set({ selectedNodeId: id }),
+    setSelectedEdgeId: (id) => set({ selectedEdgeId: id }),
 
     setNodeDragStart: (event, node, nodes) => {
         const dragPositions = {};
@@ -152,6 +161,7 @@ const useFlowStore = create((set, get) => ({
             canUndo: true,
             canRedo: false,
             selectedNodeId: null, // 선택 초기화
+            selectedEdgeId: null, // 에지 선택 초기화
             dragStartNodes: null, // 드래그 상태 초기화
         });
 

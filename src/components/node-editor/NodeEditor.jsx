@@ -114,6 +114,13 @@ const NodeEditor = () => {
         flowStore.deleteNode(nodeId);
     }, [flowStore]);
 
+    // Edge deletion handler with confirmation
+    const handleEdgeDelete = useCallback((edgeId) => {
+        if (window.confirm('선택한 연결을 삭제하시겠습니까?')) {
+            flowStore.deleteEdge(edgeId);
+        }
+    }, [flowStore]);
+
     useEffect(() => {
         if (isSimplified) {
             setNodes(flowStore.present.nodes.map(node => ({
@@ -125,15 +132,19 @@ const NodeEditor = () => {
                     onDelete: () => handleDeleteNode(node.id) // 간소화 모드에도 onDelete 콜백 추가
                 }
             })));
-            setEdges(flowStore.present.edges);
         } else {
             setNodes(Array.isArray(flowStore.present.nodes) ? flowStore.present.nodes.map(node => ({
                 ...node,
                 type: 'node'
             })) : []);
-            setEdges(flowStore.present.edges);
         }
-    }, [flowStore.present.nodes, flowStore.present.edges, isSimplified, handleDeleteNode]);
+        
+        // Apply selection styling to edges
+        setEdges(flowStore.present.edges.map(edge => ({
+            ...edge,
+            className: edge.id === flowStore.selectedEdgeId ? 'selected' : ''
+        })));
+    }, [flowStore.present.nodes, flowStore.present.edges, flowStore.selectedEdgeId, isSimplified, handleDeleteNode]);
 
     const handleSave = useCallback(async () => {
         if (!userId || !projectName || !reactFlowInstance) {
@@ -172,6 +183,8 @@ const NodeEditor = () => {
     const handleEdgesChange = useCallback((changes) => {
         const updatedEdges = applyEdgeChanges(changes, edges);
         setEdges(updatedEdges);
+        // Integrate with undo/redo system like handleConnect does
+        flowStore.set(nodes, updatedEdges);
     }, [nodes, edges, flowStore]);
 
     const handleNodeDragStart = useCallback((event, node, nodes) => {
@@ -194,21 +207,49 @@ const NodeEditor = () => {
         setSelectedNode(node);
     }, []);
 
+    // Edge click handler for selection
+    const onEdgeClick = useCallback((event, edge) => {
+        event.stopPropagation();
+        flowStore.setSelectedEdgeId(edge.id);
+        // Clear node selection when edge is selected
+        flowStore.setSelectedNodeId(null);
+        setSelectedNode(null);
+    }, [flowStore]);
+
+    // Edge double-click handler for quick deletion
+    const handleEdgeDoubleClick = useCallback((event, edge) => {
+        event.stopPropagation();
+        handleEdgeDelete(edge.id);
+    }, [handleEdgeDelete]);
+
+    // Context menu state for edges
+    const [contextMenu, setContextMenu] = useState(null);
+
+    // Edge context menu handler
+    const handleEdgeContextMenu = useCallback((event, edge) => {
+        event.preventDefault();
+        setContextMenu({
+            x: event.clientX,
+            y: event.clientY,
+            edge
+        });
+    }, []);
+
     const onGenSettings = useCallback(() => {
         setSelectedNode({id: 'genset', type: 'GENSET', data: {label: 'Genset', componentType: 'GENSET'}});
     }, []);
 
     // 키보드 단축키 핸들러 추가
     const handleKeyDown = useCallback((event) => {
-        // Delete 또는 Backspace 키를 눌렀을 때
-        if ((event.key === 'Delete' || event.key === 'Backspace') && flowStore.selectedNodeId) {
-            // input이나 textarea에 포커스가 있지 않을 때만 삭제
-            const activeElement = document.activeElement;
-            const isInputFocused = activeElement.tagName === 'INPUT' || 
-                                   activeElement.tagName === 'TEXTAREA' || 
-                                   activeElement.contentEditable === 'true';
-            
-            if (!isInputFocused) {
+        // input이나 textarea에 포커스가 있지 않을 때만 삭제 처리
+        const activeElement = document.activeElement;
+        const isInputFocused = activeElement.tagName === 'INPUT' || 
+                               activeElement.tagName === 'TEXTAREA' || 
+                               activeElement.contentEditable === 'true';
+        
+        if (!isInputFocused && (event.key === 'Delete' || event.key === 'Backspace')) {
+            // 노드 삭제 처리
+            if (flowStore.selectedNodeId) {
                 event.preventDefault();
                 
                 // Shift 키가 눌려있으면 확인 없이 즉시 삭제
@@ -221,8 +262,22 @@ const NodeEditor = () => {
                     }
                 }
             }
+            // 에지 삭제 처리
+            else if (flowStore.selectedEdgeId) {
+                event.preventDefault();
+                
+                // Shift 키가 눌려있으면 확인 없이 즉시 삭제
+                if (event.shiftKey) {
+                    flowStore.deleteEdge(flowStore.selectedEdgeId);
+                } else {
+                    // 기본적으로는 확인 다이얼로그 표시
+                    if (window.confirm('선택한 연결을 삭제하시겠습니까?')) {
+                        flowStore.deleteEdge(flowStore.selectedEdgeId);
+                    }
+                }
+            }
         }
-    }, [flowStore.selectedNodeId, handleDeleteNode]);
+    }, [flowStore.selectedNodeId, flowStore.selectedEdgeId, handleDeleteNode, flowStore]);
 
     const handleDrop = useCallback((event) => {
         event.preventDefault();
@@ -245,7 +300,11 @@ const NodeEditor = () => {
 
     const onPaneClick = useCallback(() => {
         setSelectedNode(null);
-    }, [setSelectedNode]);
+        flowStore.setSelectedNodeId(null);
+        flowStore.setSelectedEdgeId(null);
+        // Close context menu if open
+        setContextMenu(null);
+    }, [setSelectedNode, flowStore]);
 
     const renderInspector = useCallback(() => {
         if (!selectedNode || !selectedNode.data) return null;
@@ -351,6 +410,50 @@ const NodeEditor = () => {
         flowStore.updateNodeProp(nodeId, key, value);
     };
 
+    // Edge context menu component
+    const EdgeContextMenu = useCallback(() => {
+        if (!contextMenu) return null;
+        
+        return (
+            <div 
+                className="edge-context-menu"
+                style={{
+                    position: 'fixed',
+                    left: contextMenu.x,
+                    top: contextMenu.y,
+                    backgroundColor: 'white',
+                    border: '1px solid #ccc',
+                    borderRadius: '4px',
+                    boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+                    zIndex: 1000,
+                    minWidth: '120px'
+                }}
+                onMouseLeave={() => setContextMenu(null)}
+            >
+                <button
+                    style={{
+                        display: 'block',
+                        width: '100%',
+                        padding: '8px 12px',
+                        border: 'none',
+                        backgroundColor: 'transparent',
+                        textAlign: 'left',
+                        cursor: 'pointer',
+                        fontSize: '14px'
+                    }}
+                    onClick={() => {
+                        handleEdgeDelete(contextMenu.edge.id);
+                        setContextMenu(null);
+                    }}
+                    onMouseEnter={(e) => e.target.style.backgroundColor = '#f5f5f5'}
+                    onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+                >
+                    🗑️ 연결 삭제
+                </button>
+            </div>
+        );
+    }, [contextMenu, handleEdgeDelete]);
+
     return (
         <div className="node-editor">
 
@@ -374,7 +477,14 @@ const NodeEditor = () => {
                         onNodeDragStart={handleNodeDragStart}
                         onNodeDragStop={handleNodeDragStop}
                         onEdgesChange={handleEdgesChange}
-                        defaultEdgeOptions={{type: 'smoothstep'}}
+                        onEdgeClick={onEdgeClick}
+                        onEdgeDoubleClick={handleEdgeDoubleClick}
+                        onEdgeContextMenu={handleEdgeContextMenu}
+                        defaultEdgeOptions={{
+                            type: 'smoothstep',
+                            deletable: true,
+                            focusable: true
+                        }}
                         connectionLineType='smoothstep'
                         onConnect={handleConnect}
                         onPaneClick={onPaneClick}
@@ -399,6 +509,7 @@ const NodeEditor = () => {
                     {selectedNode ? renderInspector() : null}
                 </div>
             </ReactFlowProvider>
+            <EdgeContextMenu />
         </div>
     );
 };
