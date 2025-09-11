@@ -1,6 +1,7 @@
-import React, { memo } from 'react';
-import { Handle, Position } from 'reactflow';
+import React, { memo, useEffect } from 'react';
+import { Handle, Position, useUpdateNodeInternals } from 'reactflow';
 import './styles/NodeItem.css';
+import { getPortPosition } from '../../utils/portHelper.js';
 
 import ICO from '../../../icon/keyboard_command_key_24dp_E3E3E3_FILL0_wght400_GRAD0_opsz24.svg';
 function formatNodeValue(key, value) {
@@ -10,7 +11,21 @@ function formatNodeValue(key, value) {
     return value?.toString();
 }
 
-const NodeItem = ({ data, type, onDelete }) => {
+const NodeItem = ({ id, data, type, onDelete }) => {
+    const updateNodeInternals = useUpdateNodeInternals();
+
+    // 데이터로부터 각도 값을 가져옴 (없으면 기본값 0)
+    const azimuthal = data.componentProp?.azimuthal || 0;
+
+    // 입력 포트와 출력 포트의 위치 계산
+    // 입력은 방위각의 반대편, 출력은 방위각 방향으로 설정
+    const inputPosition = getPortPosition(azimuthal + 180);
+    const outputPosition = getPortPosition(azimuthal);
+
+    useEffect(() => {
+        updateNodeInternals(id);
+    }, [id, updateNodeInternals, inputPosition, outputPosition]);
+
     return (
         <div className="node">
             <div className={`node-header-${data.componentType}`}>
@@ -35,7 +50,7 @@ const NodeItem = ({ data, type, onDelete }) => {
             </div>
             {/* node body */ }
             <div className="node-body">
-                <Handle type="target" position={Position.Top}/>
+                <Handle type="target" position={inputPosition}/>
                 <div className="node-content">
                     <div className="node-position">
                         {data.label}
@@ -54,7 +69,7 @@ const NodeItem = ({ data, type, onDelete }) => {
                         })}
                     </div>
                 </div>
-                <Handle type="source" position={Position.Bottom}/>
+                <Handle type="source" position={outputPosition}/>
             </div>
         </div>
     );

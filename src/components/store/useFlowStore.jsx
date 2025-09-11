@@ -82,7 +82,11 @@ const useFlowStore = create((set, get) => ({
         const nodes = present.nodes.filter((n) => n.id !== nodeId);
         const edges = present.edges.filter((e) => e.source !== nodeId && e.target !== nodeId);
         set(nodes, edges);
-        store.selectedNodeId = null; // 선택 초기화
+        // 선택된 노드가 삭제되는 노드인 경우 선택 초기화
+        const { selectedNodeId } = get();
+        if (selectedNodeId === nodeId) {
+            set({ selectedNodeId: null });
+        }
     },
 
     setSelectedNodeId: (id) => set({ selectedNodeId: id }),

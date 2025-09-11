@@ -92,6 +92,14 @@
     font-weight: 600;
 }
 
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
 /* --- Cards --- */
 .inspector-card {
     background-color: rgba(44, 49, 58, 0.7);

@@ -3,12 +3,22 @@ import MeshVisualizer from './MeshVisualizer';
 import TableEditor from './TableEditor';
 
 const FormField = React.memo(({ field, value, onChange, error }) => {
+    const validationProps = {};
+    if (field.validation) {
+        if (field.validation.min !== undefined) validationProps.min = field.validation.min;
+        if (field.validation.max !== undefined) validationProps.max = field.validation.max;
+    }
+    if (field.required) {
+        validationProps.required = true;
+    }
+
     const commonProps = {
         id: field.id,
         value: value ?? field.default ?? '',
         onChange: (e) => onChange(field.id, e.target.value),
         className: `field-input ${error ? 'has-error' : ''}`,
         placeholder: field.placeholder || '',
+        ...validationProps,
     };
 
     let inputElement;

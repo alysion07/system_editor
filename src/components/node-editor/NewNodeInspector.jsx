@@ -1,22 +1,68 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import FormField from './controls/FormField';
-import './styles/NodeInspector.css'; // 기존 CSS 재사용
+import './styles/NodeInspector.css';
 
 const NewNodeInspector = ({ node, componentDefinition, onPropertyChange }) => {
     const [activeTab, setActiveTab] = useState(null);
     const [formValues, setFormValues] = useState({});
+    const [errors, setErrors] = useState({});
 
-    // 선택된 노드가 변경되면 로컬 상태를 props에서 받은 값으로 동기화합니다.
+    const validateField = useCallback((fieldId, value, allValues) => {
+        let fieldDef;
+        componentDefinition.properties.tabs.forEach(tab => {
+            tab.cards.forEach(card => {
+                const foundField = card.fields.find(f => f.id === fieldId);
+                if (foundField) {
+                    fieldDef = foundField;
+                }
+            });
+        });
+
+        if (!fieldDef) return null;
+
+        if (fieldDef.required && (value === '' || value === null || value === undefined)) {
+            return `${fieldDef.label} is a required field.`
+        }
+
+        const numValue = parseFloat(value);
+        if (fieldDef.validation) {
+            if (fieldDef.validation.min !== undefined && numValue < fieldDef.validation.min) {
+                return `${fieldDef.label} must be at least ${fieldDef.validation.min}.`;
+            }
+            if (fieldDef.validation.max !== undefined && numValue > fieldDef.validation.max) {
+                return `${fieldDef.label} cannot be more than ${fieldDef.validation.max}.`;
+            }
+            if (fieldDef.validation.custom) {
+                const validatorFn = componentDefinition.validators?.[fieldDef.validation.custom];
+                if (validatorFn && !validatorFn(value, allValues)) {
+                    return `Invalid value for ${fieldDef.label}. Please check the constraints.`;
+                }
+            }
+        }
+
+        return null;
+    }, [componentDefinition]);
+
     useEffect(() => {
-        if (node) {
-            setFormValues(node.data.componentProp || {});
-            // 탭 상태도 초기화
-            setActiveTab(componentDefinition?.properties?.tabs?.[0]?.id || null);
+        if (node && componentDefinition) {
+            const initialValues = node.data.componentProp || {};
+            setFormValues(initialValues);
+            setActiveTab(componentDefinition.properties.tabs?.[0]?.id || null);
+
+            const newErrors = {};
+            Object.keys(initialValues).forEach(key => {
+                const error = validateField(key, initialValues[key], initialValues);
+                if (error) {
+                    newErrors[key] = error;
+                }
+            });
+            setErrors(newErrors);
         } else {
             setFormValues({});
+            setErrors({});
             setActiveTab(null);
         }
-    }, [node, componentDefinition]);
+    }, [node, componentDefinition, validateField]);
 
     if (!node || !componentDefinition) {
         return (
@@ -27,31 +73,43 @@ const NewNodeInspector = ({ node, componentDefinition, onPropertyChange }) => {
     }
 
     const handleFieldChange = (key, value) => {
-        // 1. UI에 즉시 반영하기 위해 로컬 상태를 업데이트합니다.
-        setFormValues(prev => ({ ...prev, [key]: value }));
-        // 2. Debounce가 적용된 전역 상태 업데이트를 호출합니다.
+        const newValues = { ...formValues, [key]: value };
+        setFormValues(newValues);
+
+        const errorMessage = validateField(key, value, newValues);
+        setErrors(prevErrors => ({ ...prevErrors, [key]: errorMessage }));
+
         onPropertyChange(node.id, key, value);
     };
 
-    const renderCard = (card) => (
-        <div key={card.id} className="inspector-card">
-            <div className="card-header">
-                <h3 className="card-title">{card.label}</h3>
-                {card.description && <p className="card-description">{card.description}</p>}
+    const renderCard = (card) => {
+        if (card.conditionalDisplay) {
+            const { field, value } = card.conditionalDisplay;
+            if (formValues[field] !== value) {
+                return null;
+            }
+        }
+
+        return (
+            <div key={card.id} className="inspector-card">
+                <div className="card-header">
+                    <h3 className="card-title">{card.label}</h3>
+                    {card.description && <p className="card-description">{card.description}</p>}
+                </div>
+                <div className="card-body">
+                    {card.fields.map(field => (
+                        <FormField
+                            key={field.id}
+                            field={field}
+                            value={formValues[field.id]}
+                            onChange={handleFieldChange}
+                            error={errors[field.id]}
+                        />
+                    ))}
+                </div>
             </div>
-            <div className="card-body">
-                {card.fields.map(field => (
-                    <FormField
-                        key={field.id}
-                        field={field}
-                        value={formValues[field.id]}
-                        onChange={handleFieldChange}
-                        // error={errors[field.id]} // 에러 처리 로직은 필요시 추가
-                    />
-                ))}
-            </div>
-        </div>
-    );
+        );
+    };
 
     const renderTabContent = (tab) => (
         <div

@@ -5,6 +5,8 @@ import SNGLJUN from './components/SNGLJUN.js';
 import PIPE from './components/PIPE.js';
 import HTSTR from './components/HTSTR.js';
 import PUMP from './components/PUMP.js';
+import VALVE from './components/VALVE.js';
+import TURBINE from './components/TURBINE.js';
 import BRANCH from './components/BRANCH.js';
 import ANNULUS from './components/ANNULUS.js';
 import PRIZER from './components/PRIZER.js';
@@ -16,6 +18,8 @@ export const componentTypes = {
     PIPE,
     HTSTR,
     PUMP,
+    VALVE,
+    TURBINE,
     BRANCH,
     ANNULUS,
     PRIZER

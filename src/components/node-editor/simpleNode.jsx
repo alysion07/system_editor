@@ -4,11 +4,20 @@ import React from "react";
 import ICO_VALVE from "../../../icon/valve.svg";
 import ICO_PUMP from "../../../icon/pump.svg";
 import './styles/SimpleNode.css';
+import { getPortPosition } from '../../utils/portHelper.js';
 
 export function SimplifiedNode({ id, data, type }) {
     const updateNodeInternals = useUpdateNodeInternals();
     const shapeType = data.shape? data.shape : 'rect';
     const { width: w, height: h, background: bg, label } = data;
+
+    // 데이터로부터 각도 값을 가져옴 (없으면 기본값 0)
+    const azimuthal = data.componentProp?.azimuthal || 0;
+
+    // 입력 포트와 출력 포트의 위치 계산
+    // 입력은 방위각의 반대편, 출력은 방위각 방향으로 설정
+    const inputPosition = getPortPosition(azimuthal + 180);
+    const outputPosition = getPortPosition(azimuthal);
 
     let shapeElement;
     switch (shapeType) {
@@ -21,10 +30,6 @@ export function SimplifiedNode({ id, data, type }) {
         case 'halfcircle':
             shapeElement =
                 <path
-                    // 1) M0,h: 왼쪽 바닥점으로 이동
-                    // 2) A w/2,h 0 0,1 w,h: 반원 아크를 그려 위쪽을 통과하며 오른쪽 바닥점으로 이동
-                    // 3) L0,h: 바닥점으로 직선 이동 (아크의 끝점에서 시작점으로)
-                    // 4) Z: 경로 닫기 (첫 지점으로 자동 연결)
                     d={`
             M0,${h}
             A${w / 2},${h} 0 0,1 ${w},${h}
@@ -39,7 +44,6 @@ export function SimplifiedNode({ id, data, type }) {
             break;
         case 'halfcircle-inverted':
             shapeElement = <path
-                // 위쪽이 평평하고, 아래쪽이 반원 아크인 역반원
                 d={`
             M0,0
             A${w / 2},${h} 0 0,0 ${w},0
@@ -52,17 +56,16 @@ export function SimplifiedNode({ id, data, type }) {
             />
             break;
         case 'threebars':
-            // 가로 바 3개를 drawing
             shapeElement =
                 <g>
                     {[0, 1, 2].map((i) => {
-                        const barHeight = w * 0.1;             // 바 두께
-                        const gap = (h - 3 * barHeight) / 2;     // 바 사이 간격 균등 배치
-                        const y = i * (barHeight + gap);   // i번째 바의 y 위치
+                        const barHeight = w * 0.1;
+                        const gap = (h - 3 * barHeight) / 2;
+                        const y = i * (barHeight + gap);
                         return (
                             <rect
                                 key={i}
-                                x={w * 0.1}                        // 좌·우 마진 10%
+                                x={w * 0.1}
                                 y={y}
                                 width={w * 0.8}
                                 height={barHeight}
@@ -80,9 +83,8 @@ export function SimplifiedNode({ id, data, type }) {
 
     useEffect(() => {
         updateNodeInternals(id);
-    }, [id, data, updateNodeInternals,type]);
+    }, [id, updateNodeInternals, type, inputPosition, outputPosition]);
 
-    // data.componentType에 따라 아이콘을 다르게 설정함
     const getIcon = () => {
         const type = data.componentType;
         switch (type) {
@@ -163,7 +165,6 @@ export function SimplifiedNode({ id, data, type }) {
         if(data.shape === 'halfcircle' || data.shape === 'rect' || data.shape === 'halfcircle-inverted' || data.shape === 'threebars'){
             return (
                 <div style={{ width: w, height: h, position: 'relative'}}>
-                {/*// <div >*/}
                     <svg
                         width={w}
                         height={h}
@@ -171,20 +172,19 @@ export function SimplifiedNode({ id, data, type }) {
                         style={{ overflow: 'visible' }} // 핸들이 벗어나도 보이도록
                     >
                         {
-                            // 선택된 도형 엘리먼트에 공통 스타일 프로퍼티를 주입
                             React.cloneElement(shapeElement, {
-                                fill: bg,        // 배경색 적용
-                                stroke: '#333',  // 테두리 색
-                                strokeWidth: 1,  // 테두리 두께
+                                fill: bg,
+                                stroke: '#333',
+                                strokeWidth: 1,
                             })
                         }
                         <text
                             x={w / 2}
                             y={h / 2}
-                            textAnchor="middle"           // 텍스트 중앙 정렬
-                            dominantBaseline="middle"     // 수직 중앙 정렬
-                            fontSize="24px"            // 폰트 크기
-                            fill="#333"                   // 텍스트 색
+                            textAnchor="middle"
+                            dominantBaseline="middle"
+                            fontSize="24px"
+                            fill="#333"
                         >
                             {getSimpleLabel()}
                         </text>
@@ -209,9 +209,22 @@ export function SimplifiedNode({ id, data, type }) {
     return (
             <div className="simple-node-container">
                 {renderNode()}
+                
+                {/* Delete button for simplified node */}
+                {data.onDelete && (
+                    <button
+                        className="simple-node-delete-btn"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            data.onDelete();
+                        }}
+                    >
+                        ×
+                    </button>
+                )}
 
-                <Handle type="target" position={Position.Top}/>
-                <Handle type="source" position={Position.Bottom}/>
+                <Handle type="target" position={inputPosition}/>
+                <Handle type="source" position={outputPosition}/>
             </div>
 
     );

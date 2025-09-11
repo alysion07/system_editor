@@ -48,3 +48,36 @@
     border-color: var(--selected-border);
     box-shadow: 0 0 15px var(--selected-shadow), 0 0 0 2px var(--selected-border);
 }
+
+/* Simple node container */
+.simple-node-container {
+    position: relative;
+}
+
+/* Delete button for simple node */
+.simple-node-delete-btn {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(239, 83, 80, 0.9);
+    border: 1px solid #fff;
+    border-radius: 50%;
+    color: #fff;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    opacity: 0.8;
+    transition: all 0.2s ease;
+    z-index: 10;
+}
+
+.simple-node-delete-btn:hover {
+    background-color: #ef5350;
+    opacity: 1;
+    transform: scale(1.1);
+}

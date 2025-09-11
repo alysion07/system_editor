@@ -109,22 +109,38 @@ const NodeEditor = () => {
     }, [reactFlowInstance, nodes.length]);
 
 
+    const handleDeleteNode = useCallback((nodeId) => {
+        flowStore.deleteNode(nodeId);
+    }, [flowStore]);
+
     useEffect(() => {
+        const safeNodes = Array.isArray(flowStore.present.nodes) ? flowStore.present.nodes : [];
+
         if (isSimplified) {
-            setNodes(flowStore.present.nodes.map(node => ({
+            setNodes(safeNodes.map(node => ({
                 ...node,
                 type: 'simple',
-                data: {...node.data, icon: node.data.icon}
+                // 방어적 코딩: node.data가 없는 경우를 대비
+                data: { 
+                    ...(node.data || {}), 
+                    icon: node.data?.icon,
+                    // onDelete 콜백이 없는 경우 추가
+                    onDelete: node.data?.onDelete || (() => handleDeleteNode(node.id))
+                }
             })));
-            setEdges(flowStore.present.edges);
         } else {
-            setNodes(Array.isArray(flowStore.present.nodes) ? flowStore.present.nodes.map(node => ({
+            setNodes(safeNodes.map(node => ({
                 ...node,
-                type: 'node'
-            })) : []);
-            setEdges(flowStore.present.edges);
+                type: 'node',
+                data: {
+                    ...(node.data || {}),
+                    // onDelete 콜백이 없는 경우 추가
+                    onDelete: node.data?.onDelete || (() => handleDeleteNode(node.id))
+                }
+            })));
         }
-    }, [flowStore.present.nodes, flowStore.present.edges, isSimplified]);
+        setEdges(flowStore.present.edges);
+    }, [flowStore.present.nodes, flowStore.present.edges, isSimplified, handleDeleteNode]);
 
     const handleSave = useCallback(async () => {
         if (!userId || !projectName || !reactFlowInstance) {
@@ -189,10 +205,6 @@ const NodeEditor = () => {
         setSelectedNode({id: 'genset', type: 'GENSET', data: {label: 'Genset', componentType: 'GENSET'}});
     }, []);
 
-    const handleDeleteNode = useCallback((nodeId) => {
-        flowStore.deleteNode(nodeId);
-    }, [flowStore]);
-
     const handleDrop = useCallback((event) => {
         event.preventDefault();
         const type = event.dataTransfer.getData('application/reactflow');
@@ -247,6 +259,11 @@ const NodeEditor = () => {
             case "TMDPJUN":
             case "PIPE":
             case "PUMP":
+            case "VALVE":
+            case "TURBINE":
+            case "BRANCH":
+            case "ANNULUS":
+            case "PRIZER":
                 if (!componentDef) return null;
                 return (
                     <NewNodeInspector
